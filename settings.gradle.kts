@@ -1,3 +1,5 @@
-
-rootProject.name = "KTQL"
-
+include(
+    "codegen",
+    "integration",
+    "processor"
+)

@@ -1,7 +1,9 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
-    kotlin("jvm") version "1.9.21" apply false
+    kotlin("jvm") version "1.9.21"
+}
+
+repositories {
+    mavenCentral()
 }
 
 buildscript {
@@ -10,9 +12,7 @@ buildscript {
     }
 }
 
+
+
 group = "com.zachary-moore"
 version = "1.0-SNAPSHOT"
-
-repositories {
-    mavenCentral()
-}

@@ -9,12 +9,14 @@ repositories {
 
 dependencies {
     ksp(project(":processor"))
+    implementation(project(":codegen"))
+    implementation("com.graphql-java:graphql-java:21.3")
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 
-tasks.withType<KotlinCompile>() {
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
 }

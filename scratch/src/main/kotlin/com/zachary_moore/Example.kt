@@ -3,9 +3,9 @@ package com.zachary_moore.ktql
 import com.zachary_moore.engine.*
 
 class KTQLImpl : KTQL {
-    private val selections = arrayListOf<Field<*, *>>()
-    override val selected: List<Field<*, *>>
-        get() = selections.toList()
+    private val selections = hashSetOf<Field<*, *>>()
+    override val selected: Set<Field<*, *>>
+        get() = selections.toSet()
 
     fun TweetQuery(init: Tweet.() -> Unit) {
         val obj = Tweet()
@@ -56,10 +56,6 @@ fun ktql(init: KTQLImpl.() -> Unit): KTQL {
     return ktql
 }
 
-abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {
-    val selections = arrayListOf<Field<RESULTANT_TYPE, *>>()
-}
-
 class TweetQuery(
     obj: Tweet
 ): KTQLOperation<Tweet>() {
@@ -104,9 +100,9 @@ class NotificationsMetaQuery(
 }
 
 class Tweet : ObjectKTQLType<Tweet> {
-    private val selections: ArrayList<Field<Tweet, *>> = arrayListOf()
-    override val selected: List<Field<Tweet, *>>
-        get() = selections.toList()
+    private val selections: HashSet<Field<Tweet, *>> = hashSetOf()
+    override val selected: Set<Field<Tweet, *>>
+        get() = selections.toSet()
     fun id() {
         selections.add(SimpleField("id"))
     }
@@ -139,9 +135,9 @@ class Tweet : ObjectKTQLType<Tweet> {
     }
 }
 class User : ObjectKTQLType<User> {
-    private val selections: ArrayList<Field<User, *>> = arrayListOf()
-    override val selected: List<Field<User, *>>
-        get() = selections.toList()
+    private val selections: HashSet<Field<User, *>> = hashSetOf()
+    override val selected: Set<Field<User, *>>
+        get() = selections.toSet()
     fun id() {
         selections.add(SimpleField("id"))
     }
@@ -174,9 +170,9 @@ class User : ObjectKTQLType<User> {
     }
 }
 class Stat : ObjectKTQLType<Stat> {
-    private val selections: ArrayList<Field<Stat, *>> = arrayListOf()
-    override val selected: List<Field<Stat, *>>
-        get() = selections.toList()
+    private val selections: HashSet<Field<Stat, *>> = hashSetOf()
+    override val selected: Set<Field<Stat, *>>
+        get() = selections.toSet()
     fun views() {
         selections.add(SimpleField("views"))
     }
@@ -197,9 +193,9 @@ class Stat : ObjectKTQLType<Stat> {
     }
 }
 class Notification : ObjectKTQLType<Notification> {
-    private val selections: ArrayList<Field<Notification, *>> = arrayListOf()
-    override val selected: List<Field<Notification, *>>
-        get() = selections.toList()
+    private val selections: HashSet<Field<Notification, *>> = hashSetOf()
+    override val selected: Set<Field<Notification, *>>
+        get() = selections.toSet()
     fun id() {
         selections.add(SimpleField("id"))
     }
@@ -216,9 +212,9 @@ class Notification : ObjectKTQLType<Notification> {
     }
 }
 class Meta : ObjectKTQLType<Meta> {
-    private val selections: ArrayList<Field<Meta, *>> = arrayListOf()
-    override val selected: List<Field<Meta, *>>
-        get() = selections.toList()
+    private val selections: HashSet<Field<Meta, *>> = hashSetOf()
+    override val selected: Set<Field<Meta, *>>
+        get() = selections.toSet()
     fun count() {
         selections.add(SimpleField("count"))
     }

@@ -1,10 +1,31 @@
-import com.zachary_moore.JavaQuery
+
+import com.zachary_moore.engine.KTQL
 import com.zachary_moore.engine.stringify
-import com.zachary_moore.simpleQuery
+import com.zachary_moore.ktql.User
+import com.zachary_moore.ktql.ktql
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
 
 class KTQLShould {
+
+    private fun simpleQuery(): KTQL {
+        return ktql {
+            TweetsQuery {
+                id()
+                Author {
+                    last_name()
+                    simpleUser()
+                }
+                Stats {
+                    all()
+                }
+            }
+        }
+    }
+
+    private fun User.simpleUser() {
+        first_name()
+    }
 
     @Test
     fun simple() {
@@ -16,13 +37,18 @@ class KTQLShould {
     fun stringifyKTQL() {
         val res = simpleQuery()
         val str = stringify(res)
-        assertEquals("id, Author{last_name, first_name}, Stats{views, likes, retweets, responses}", str)
+        assertEquals("Author{last_name, first_name}, id, Stats{responses, retweets, views, likes}", str)
     }
 
     @Test
-    fun stringifyKTQLJava() {
-        val res = JavaQuery.simpleQuery()
+    fun avoidDuplicateFieldProjections() {
+        val res = ktql {
+            TweetsQuery {
+                id()
+                id()
+            }
+        }
         val str = stringify(res)
-        assertEquals("id, Author{last_name, first_name}, Stats{views, likes, retweets, responses}", str)
+        assertEquals("id", str)
     }
 }

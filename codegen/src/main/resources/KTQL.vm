@@ -1,6 +1,7 @@
 package com.zachary_moore.ktql
 
 import com.zachary_moore.ktql.engine.KTQL
+import com.zachary_moore.ktql.engine.KTQLOperation
 import com.zachary_moore.ktql.engine.KTQLType
 import com.zachary_moore.ktql.engine.TerminalKTQLType
 import com.zachary_moore.ktql.engine.ObjectKTQLType
@@ -9,9 +10,9 @@ import com.zachary_moore.ktql.engine.SimpleField
 import com.zachary_moore.ktql.engine.ComplexField
 
 class KTQLImpl : KTQL {
-    private val selections = arrayListOf<Field<*, *>>()
-    override val selected: List<Field<*, *>>
-            get() = selections.toList()
+    private val selections = hashSetOf<Field<*, *>>()
+    override val selected: Set<Field<*, *>>
+            get() = selections.toSet()
     #foreach ( $query in $schema.queries)
 
     fun ${query.name}Query(init: ${query.resultantType.value.name}.() -> Unit) {
@@ -29,10 +30,6 @@ fun ktql(init: KTQLImpl.() -> Unit): KTQL {
     return ktql
 }
 
-abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {
-    val selections = arrayListOf<Field<RESULTANT_TYPE, *>>()
-}
-
 #foreach ( $query in $schema.queries)
 class ${query.name}Query(
     obj: ${query.resultantType.value.name}
@@ -48,9 +45,9 @@ class ${query.name}Query(
 class ${type.name} : TerminalKTQLType<${type.name}>
   #else
 class ${type.name} : ObjectKTQLType<${type.name}> {
-    private val selections: ArrayList<Field<${type.name}, *>> = arrayListOf()
-    override val selected: List<Field<${type.name}, *>>
-        get() = selections.toList()
+    private val selections: HashSet<Field<${type.name}, *>> = hashSetOf()
+    override val selected: Set<Field<${type.name}, *>>
+        get() = selections.toSet()
     #foreach ($field in $type.fields)
         #if ($field.Primitive)
     fun ${field.fieldName}() {

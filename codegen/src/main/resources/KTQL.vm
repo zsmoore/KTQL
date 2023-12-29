@@ -1,30 +1,12 @@
 package com.zachary_moore.ktql
 
-interface KTQL {
-    val selected: List<Field<*, *>>
-}
-
-sealed interface KTQLType<TYPE: KTQLType<TYPE>>
-
-interface TerminalKTQLType<TYPE: KTQLType<TYPE>>: KTQLType<TYPE>
-
-interface ObjectKTQLType<TYPE: KTQLType<TYPE>>: KTQLType<TYPE> {
-    fun all()
-    val selected: List<Field<TYPE, *>>
-}
-
-sealed class Field<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>> {
-    abstract val gqlRepresentation: String
-}
-
-class SimpleField<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>>(
-    override val gqlRepresentation: String
-): Field<PARENT, TYPE>()
-
-class ComplexField<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>>(
-    override val gqlRepresentation: String,
-    val innerObject: ObjectKTQLType<TYPE>
-): Field<PARENT, TYPE>()
+import com.zachary_moore.ktql.engine.KTQL
+import com.zachary_moore.ktql.engine.KTQLType
+import com.zachary_moore.ktql.engine.TerminalKTQLType
+import com.zachary_moore.ktql.engine.ObjectKTQLType
+import com.zachary_moore.ktql.engine.Field
+import com.zachary_moore.ktql.engine.SimpleField
+import com.zachary_moore.ktql.engine.ComplexField
 
 class KTQLImpl : KTQL {
     private val selections = arrayListOf<Field<*, *>>()

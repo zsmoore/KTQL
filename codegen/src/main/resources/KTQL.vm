@@ -1,0 +1,80 @@
+package com.zachary_moore.ktql
+
+import com.zachary_moore.ktql.engine.KTQL
+import com.zachary_moore.ktql.engine.KTQLType
+import com.zachary_moore.ktql.engine.TerminalKTQLType
+import com.zachary_moore.ktql.engine.ObjectKTQLType
+import com.zachary_moore.ktql.engine.Field
+import com.zachary_moore.ktql.engine.SimpleField
+import com.zachary_moore.ktql.engine.ComplexField
+
+class KTQLImpl : KTQL {
+    private val selections = arrayListOf<Field<*, *>>()
+    override val selected: List<Field<*, *>>
+            get() = selections.toList()
+    #foreach ( $query in $schema.queries)
+
+    fun ${query.name}Query(init: ${query.resultantType.value.name}.() -> Unit) {
+        val obj = ${query.resultantType.value.name}()
+        obj.init()
+        val operation = ${query.name}Query(obj)
+        selections.addAll(operation.selections)
+    }
+    #end
+}
+
+fun ktql(init: KTQLImpl.() -> Unit): KTQL {
+    val ktql = KTQLImpl()
+    ktql.init()
+    return ktql
+}
+
+abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {
+    val selections = arrayListOf<Field<RESULTANT_TYPE, *>>()
+}
+
+#foreach ( $query in $schema.queries)
+class ${query.name}Query(
+    obj: ${query.resultantType.value.name}
+): KTQLOperation<${query.resultantType.value.name}>() {
+    init {
+        selections.addAll(obj.selected)
+    }
+}
+#end
+
+#foreach ($type in $schema.types)
+  #if ($type.fields.size == 0)
+class ${type.name} : TerminalKTQLType<${type.name}>
+  #else
+class ${type.name} : ObjectKTQLType<${type.name}> {
+    private val selections: ArrayList<Field<${type.name}, *>> = arrayListOf()
+    override val selected: List<Field<${type.name}, *>>
+        get() = selections.toList()
+    #foreach ($field in $type.fields)
+        #if ($field.Primitive)
+    fun ${field.fieldName}() {
+        selections.add(SimpleField("$field.fieldName"))
+    }
+        #else
+    fun ${field.fieldName}(init: ${field.fieldType.value.name}.() -> Unit) {
+        val obj = ${field.fieldType.value.name}()
+        obj.init()
+        selections.add(ComplexField("$field.fieldName", obj))
+    }
+        #end
+    #end
+    override fun all() {
+    #foreach ($field in $type.fields)
+        #if ( $field.Primitive)
+        ${field.fieldName}()
+        #else
+        ${field.fieldName} {
+            all()
+        }
+        #end
+    #end
+    }
+}
+  #end
+#end

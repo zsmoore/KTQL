@@ -1,11 +1,16 @@
 package com.zachary_moore.ktql
 
+interface KTQL {
+    val selected: List<Field<*, *>>
+}
+
 sealed interface KTQLType<TYPE: KTQLType<TYPE>>
 
 interface TerminalKTQLType<TYPE: KTQLType<TYPE>>: KTQLType<TYPE>
 
 interface ObjectKTQLType<TYPE: KTQLType<TYPE>>: KTQLType<TYPE> {
-    val allFields: List<Field<TYPE, *>>
+    fun all()
+    val selected: List<Field<TYPE, *>>
 }
 
 sealed class Field<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>> {
@@ -18,168 +23,232 @@ class SimpleField<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>>(
 
 class ComplexField<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>>(
     override val gqlRepresentation: String,
-    val fields: List<Field<TYPE, *>>
+    val innerObject: ObjectKTQLType<TYPE>
 ): Field<PARENT, TYPE>()
 
-class KTQL {
+class KTQLImpl : KTQL {
     private val selections = arrayListOf<Field<*, *>>()
-    val selected: List<Field<*, *>>
+    override val selected: List<Field<*, *>>
         get() = selections.toList()
 
-    fun TweetQuery(init: TweetQuery.() -> Unit) {
-        val operation = TweetQuery()
-        operation.init()
+    fun TweetQuery(init: Tweet.() -> Unit) {
+        val obj = Tweet()
+        obj.init()
+        val operation = TweetQuery(obj)
         selections.addAll(operation.selections)
     }
 
-    fun TweetsQuery(init: TweetsQuery.() -> Unit) {
-        val operation = TweetsQuery()
-        operation.init()
+    fun TweetsQuery(init: Tweet.() -> Unit) {
+        val obj = Tweet()
+        obj.init()
+        val operation = TweetsQuery(obj)
         selections.addAll(operation.selections)
     }
 
-    fun TweetsMetaQuery(init: TweetsMetaQuery.() -> Unit) {
-        val operation = TweetsMetaQuery()
-        operation.init()
+    fun TweetsMetaQuery(init: Meta.() -> Unit) {
+        val obj = Meta()
+        obj.init()
+        val operation = TweetsMetaQuery(obj)
         selections.addAll(operation.selections)
     }
 
-    fun UserQuery(init: UserQuery.() -> Unit) {
-        val operation = UserQuery()
-        operation.init()
+    fun UserQuery(init: User.() -> Unit) {
+        val obj = User()
+        obj.init()
+        val operation = UserQuery(obj)
         selections.addAll(operation.selections)
     }
 
-    fun NotificationsQuery(init: NotificationsQuery.() -> Unit) {
-        val operation = NotificationsQuery()
-        operation.init()
+    fun NotificationsQuery(init: Notification.() -> Unit) {
+        val obj = Notification()
+        obj.init()
+        val operation = NotificationsQuery(obj)
         selections.addAll(operation.selections)
     }
 
-    fun NotificationsMetaQuery(init: NotificationsMetaQuery.() -> Unit) {
-        val operation = NotificationsMetaQuery()
-        operation.init()
+    fun NotificationsMetaQuery(init: Meta.() -> Unit) {
+        val obj = Meta()
+        obj.init()
+        val operation = NotificationsMetaQuery(obj)
         selections.addAll(operation.selections)
     }
 }
 
-fun ktql(init: KTQL.() -> Unit): KTQL {
-    val ktql = KTQL()
+fun ktql(init: KTQLImpl.() -> Unit): KTQL {
+    val ktql = KTQLImpl()
     ktql.init()
     return ktql
 }
 
 abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {
     val selections = arrayListOf<Field<RESULTANT_TYPE, *>>()
-    fun select(vararg fields: Field<RESULTANT_TYPE, *>) {
-        selections.addAll(fields)
+}
+
+class TweetQuery(
+    obj: Tweet
+): KTQLOperation<Tweet>() {
+    init {
+        selections.addAll(obj.selected)
+    }
+}
+class TweetsQuery(
+    obj: Tweet
+): KTQLOperation<Tweet>() {
+    init {
+        selections.addAll(obj.selected)
+    }
+}
+class TweetsMetaQuery(
+    obj: Meta
+): KTQLOperation<Meta>() {
+    init {
+        selections.addAll(obj.selected)
+    }
+}
+class UserQuery(
+    obj: User
+): KTQLOperation<User>() {
+    init {
+        selections.addAll(obj.selected)
+    }
+}
+class NotificationsQuery(
+    obj: Notification
+): KTQLOperation<Notification>() {
+    init {
+        selections.addAll(obj.selected)
+    }
+}
+class NotificationsMetaQuery(
+    obj: Meta
+): KTQLOperation<Meta>() {
+    init {
+        selections.addAll(obj.selected)
     }
 }
 
-class TweetQuery: KTQLOperation<Tweet>()
-class TweetsQuery: KTQLOperation<Tweet>()
-class TweetsMetaQuery: KTQLOperation<Meta>()
-class UserQuery: KTQLOperation<User>()
-class NotificationsQuery: KTQLOperation<Notification>()
-class NotificationsMetaQuery: KTQLOperation<Meta>()
-
-class Tweet private constructor(): ObjectKTQLType<Tweet> {
+class Tweet : ObjectKTQLType<Tweet> {
     private val selections: ArrayList<Field<Tweet, *>> = arrayListOf()
-    val selected: List<Field<Tweet, *>>
+    override val selected: List<Field<Tweet, *>>
         get() = selections.toList()
     fun id() {
         selections.add(SimpleField("id"))
     }
+    fun body() {
+        selections.add(SimpleField("body"))
+    }
+    fun date() {
+        selections.add(SimpleField("date"))
+    }
     fun Author(init: User.() -> Unit) {
-        
+        val obj = User()
+        obj.init()
+        selections.add(ComplexField("Author", obj))
     }
-    companion object {
-        val id : SimpleField<Tweet, KTQLID> = SimpleField("id")
-        val body : SimpleField<Tweet, KTQLString> = SimpleField("body")
-        val date : SimpleField<Tweet, Date> = SimpleField("date")
-        fun Author(innerSelection: () -> List<Field<User, *>>): ComplexField<Tweet, User> {
-            return ComplexField("", innerSelection.invoke())
+    fun Stats(init: Stat.() -> Unit) {
+        val obj = Stat()
+        obj.init()
+        selections.add(ComplexField("Stats", obj))
+    }
+    override fun all() {
+        id()
+        body()
+        date()
+        Author {
+            all()
         }
-        fun Stats(innerSelection: () -> List<Field<Stat, *>>): ComplexField<Tweet, Stat> {
-            return ComplexField("", innerSelection.invoke())
+        Stats {
+            all()
         }
-        val allFields =
-            listOf(
-                id,
-                body,
-                date,
-                Author { User.allFields },
-                Stats { Stat.allFields },
-            )
     }
-    override val allFields: List<Field<Tweet, *>>
-        get() = Tweet.allFields
 }
-class User private constructor(): ObjectKTQLType<User> {
-    companion object {
-        val id : SimpleField<User, KTQLID> = SimpleField("id")
-        val username : SimpleField<User, KTQLString> = SimpleField("username")
-        val first_name : SimpleField<User, KTQLString> = SimpleField("first_name")
-        val last_name : SimpleField<User, KTQLString> = SimpleField("last_name")
-        val full_name : SimpleField<User, KTQLString> = SimpleField("full_name")
-        val name : SimpleField<User, KTQLString> = SimpleField("name")
-        val avatar_url : SimpleField<User, Url> = SimpleField("avatar_url")
-        val allFields =
-            listOf(
-                id,
-                username,
-                first_name,
-                last_name,
-                full_name,
-                name,
-                avatar_url,
-            )
+class User : ObjectKTQLType<User> {
+    private val selections: ArrayList<Field<User, *>> = arrayListOf()
+    override val selected: List<Field<User, *>>
+        get() = selections.toList()
+    fun id() {
+        selections.add(SimpleField("id"))
     }
-    override val allFields: List<Field<User, *>>
-        get() = User.allFields
+    fun username() {
+        selections.add(SimpleField("username"))
+    }
+    fun first_name() {
+        selections.add(SimpleField("first_name"))
+    }
+    fun last_name() {
+        selections.add(SimpleField("last_name"))
+    }
+    fun full_name() {
+        selections.add(SimpleField("full_name"))
+    }
+    fun name() {
+        selections.add(SimpleField("name"))
+    }
+    fun avatar_url() {
+        selections.add(SimpleField("avatar_url"))
+    }
+    override fun all() {
+        id()
+        username()
+        first_name()
+        last_name()
+        full_name()
+        name()
+        avatar_url()
+    }
 }
-class Stat private constructor(): ObjectKTQLType<Stat> {
-    companion object {
-        val views : SimpleField<Stat, KTQLInt> = SimpleField("views")
-        val likes : SimpleField<Stat, KTQLInt> = SimpleField("likes")
-        val retweets : SimpleField<Stat, KTQLInt> = SimpleField("retweets")
-        val responses : SimpleField<Stat, KTQLInt> = SimpleField("responses")
-        val allFields =
-            listOf(
-                views,
-                likes,
-                retweets,
-                responses,
-            )
+class Stat : ObjectKTQLType<Stat> {
+    private val selections: ArrayList<Field<Stat, *>> = arrayListOf()
+    override val selected: List<Field<Stat, *>>
+        get() = selections.toList()
+    fun views() {
+        selections.add(SimpleField("views"))
     }
-    override val allFields: List<Field<Stat, *>>
-        get() = Stat.allFields
+    fun likes() {
+        selections.add(SimpleField("likes"))
+    }
+    fun retweets() {
+        selections.add(SimpleField("retweets"))
+    }
+    fun responses() {
+        selections.add(SimpleField("responses"))
+    }
+    override fun all() {
+        views()
+        likes()
+        retweets()
+        responses()
+    }
 }
-class Notification private constructor(): ObjectKTQLType<Notification> {
-    companion object {
-        val id : SimpleField<Notification, KTQLID> = SimpleField("id")
-        val date : SimpleField<Notification, Date> = SimpleField("date")
-        val type : SimpleField<Notification, KTQLString> = SimpleField("type")
-        val allFields =
-            listOf(
-                id,
-                date,
-                type,
-            )
+class Notification : ObjectKTQLType<Notification> {
+    private val selections: ArrayList<Field<Notification, *>> = arrayListOf()
+    override val selected: List<Field<Notification, *>>
+        get() = selections.toList()
+    fun id() {
+        selections.add(SimpleField("id"))
     }
-    override val allFields: List<Field<Notification, *>>
-        get() = Notification.allFields
+    fun date() {
+        selections.add(SimpleField("date"))
+    }
+    fun type() {
+        selections.add(SimpleField("type"))
+    }
+    override fun all() {
+        id()
+        date()
+        type()
+    }
 }
-class Meta private constructor(): ObjectKTQLType<Meta> {
-    companion object {
-        val count : SimpleField<Meta, KTQLInt> = SimpleField("count")
-        val allFields =
-            listOf(
-                count,
-            )
+class Meta : ObjectKTQLType<Meta> {
+    private val selections: ArrayList<Field<Meta, *>> = arrayListOf()
+    override val selected: List<Field<Meta, *>>
+        get() = selections.toList()
+    fun count() {
+        selections.add(SimpleField("count"))
     }
-    override val allFields: List<Field<Meta, *>>
-        get() = Meta.allFields
+    override fun all() {
+        count()
+    }
 }
 class KTQLInt : TerminalKTQLType<KTQLInt>
 class KTQLFloat : TerminalKTQLType<KTQLFloat>

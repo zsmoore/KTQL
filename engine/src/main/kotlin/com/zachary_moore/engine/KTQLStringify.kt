@@ -1,3 +1,3 @@
 package com.zachary_moore.engine
 
-class KTQLVariable
+fun stringify(ktql: KTQL)

@@ -1,11 +1,16 @@
 package com.zachary_moore.ktql
 
+interface KTQL {
+    val selected: List<Field<*, *>>
+}
+
 sealed interface KTQLType<TYPE: KTQLType<TYPE>>
 
 interface TerminalKTQLType<TYPE: KTQLType<TYPE>>: KTQLType<TYPE>
 
 interface ObjectKTQLType<TYPE: KTQLType<TYPE>>: KTQLType<TYPE> {
-    val allFields: List<Field<TYPE, *>>
+    fun all()
+    val selected: List<Field<TYPE, *>>
 }
 
 sealed class Field<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>> {
@@ -18,25 +23,26 @@ class SimpleField<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>>(
 
 class ComplexField<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>>(
     override val gqlRepresentation: String,
-    val fields: List<Field<TYPE, *>>
+    val innerObject: ObjectKTQLType<TYPE>
 ): Field<PARENT, TYPE>()
 
-class KTQL {
+class KTQLImpl : KTQL {
     private val selections = arrayListOf<Field<*, *>>()
-    val selected: List<Field<*, *>>
+    override val selected: List<Field<*, *>>
             get() = selections.toList()
     #foreach ( $query in $schema.queries)
 
-    fun ${query.name}Query(init: ${query.name}Query.() -> Unit) {
-        val operation = ${query.name}Query()
-        operation.init()
+    fun ${query.name}Query(init: ${query.resultantType.value.name}.() -> Unit) {
+        val obj = ${query.resultantType.value.name}()
+        obj.init()
+        val operation = ${query.name}Query(obj)
         selections.addAll(operation.selections)
     }
     #end
 }
 
-fun ktql(init: KTQL.() -> Unit): KTQL {
-    val ktql = KTQL()
+fun ktql(init: KTQLImpl.() -> Unit): KTQL {
+    val ktql = KTQLImpl()
     ktql.init()
     return ktql
 }
@@ -46,37 +52,47 @@ abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {
 }
 
 #foreach ( $query in $schema.queries)
-class ${query.name}Query: KTQLOperation<${query.resultantType.value.name}>()
+class ${query.name}Query(
+    obj: ${query.resultantType.value.name}
+): KTQLOperation<${query.resultantType.value.name}>() {
+    init {
+        selections.addAll(obj.selected)
+    }
+}
 #end
 
 #foreach ($type in $schema.types)
   #if ($type.fields.size == 0)
 class ${type.name} : TerminalKTQLType<${type.name}>
   #else
-class ${type.name} private constructor(): ObjectKTQLType<${type.name}> {
-    companion object {
-        #foreach ($field in $type.fields)
-          #if (! $field.Primitive)
-        fun ${field.fieldName}(innerSelection: () -> List<Field<$field.fieldType.value.name, *>>): ComplexField<${type.name}, $field.fieldType.value.name> {
-            return ComplexField("", innerSelection.invoke())
-        }
-          #else
-        val $field.fieldName : SimpleField<${type.name}, $field.fieldType.value.name> = SimpleField("$field.fieldName")
-          #end
-        #end
-        val allFields =
-            listOf(
-            #foreach ($field in $type.fields)
-                #if ($field.Primitive)
-                $field.fieldName,
-                #else
-                $field.fieldName { ${field.fieldType.value.name}.allFields },
-                #end
-            #end
-            )
+class ${type.name} : ObjectKTQLType<${type.name}> {
+    private val selections: ArrayList<Field<${type.name}, *>> = arrayListOf()
+    override val selected: List<Field<${type.name}, *>>
+        get() = selections.toList()
+    #foreach ($field in $type.fields)
+        #if ($field.Primitive)
+    fun ${field.fieldName}() {
+        selections.add(SimpleField("$field.fieldName"))
     }
-    override val allFields: List<Field<${type.name}, *>>
-        get() = ${type.name}.allFields
+        #else
+    fun ${field.fieldName}(init: ${field.fieldType.value.name}.() -> Unit) {
+        val obj = ${field.fieldType.value.name}()
+        obj.init()
+        selections.add(ComplexField("$field.fieldName", obj))
+    }
+        #end
+    #end
+    override fun all() {
+    #foreach ($field in $type.fields)
+        #if ( $field.Primitive)
+        ${field.fieldName}()
+        #else
+        ${field.fieldName} {
+            all()
+        }
+        #end
+    #end
+    }
 }
   #end
 #end

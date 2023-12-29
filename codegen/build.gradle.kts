@@ -13,6 +13,7 @@ dependencies {
     implementation("com.graphql-java:graphql-java:21.3")
     implementation(kotlin("stdlib-jdk8"))
     testImplementation(kotlin("test"))
+    implementation("org.apache.commons:commons-lang3:3.14.0")
 }
 
 tasks.test {

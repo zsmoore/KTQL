@@ -1,31 +1,24 @@
 package com.zachary_moore
 
-import com.zachary_moore.ktql.*
+import com.zachary_moore.ktql.KTQL
+import com.zachary_moore.ktql.User
+import com.zachary_moore.ktql.ktql
 
 fun simpleQuery(): KTQL {
     return ktql {
-        TweetQuery {
-            select (
-                Tweet.body
-            )
-        }
         TweetsQuery {
-            select(
-                Tweet.Author {
-                    User.first_name
-                }
-            )
-        }
-        TweetsQuery {
-            select(
-                Tweet.Author {
-                    simpleUser()
-                }
-            )
+            id()
+            Author {
+                last_name()
+                simpleUser()
+            }
+            Stats {
+                all()
+            }
         }
     }
 }
 
-fun simpleUser(): List<Field<User, *>> {
-    return listOf(User.full_name, User.last_name)
+fun User.simpleUser() {
+    first_name()
 }

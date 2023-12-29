@@ -1,5 +1,7 @@
 include(
     "codegen",
     "integration",
-    "processor"
+    "processor",
+    "scratch",
+    "engine"
 )

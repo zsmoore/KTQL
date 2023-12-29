@@ -12,6 +12,7 @@ dependencies {
     implementation("org.apache.velocity:velocity:1.7")
     implementation("com.graphql-java:graphql-java:21.3")
     implementation(kotlin("stdlib-jdk8"))
+    testImplementation(kotlin("test"))
 }
 
 tasks.test {

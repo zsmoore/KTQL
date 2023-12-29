@@ -1,24 +1,40 @@
-package com.zachary_moore.com.zachary_moore.spec
+package com.zachary_moore.spec
 
-data class Document(
+data class Schema(
     val queries: List<Query>,
-    val mutations: List<Mutation>
+    val mutations: List<Mutation>,
+    val types: List<Type>
 )
 
 data class Query(
-    val name: String
+    val name: String,
+    val resultantType: Lazy<Type>
 )
 
 data class Mutation(
-    val name: String
+    val name: String,
+    val resultantType: Lazy<Type>
 )
+
+sealed interface Field {
+    val fieldName: String
+    val isPrimitive: Boolean
+}
 
 data class Type(
     val name: String,
     val fields: List<Field>
 )
 
-data class Field(
-    val fieldName: String
-)
+data class ComplexField(
+    override val fieldName: String,
+    val fieldType: Lazy<Type>,
+    override val isPrimitive: Boolean = false,
+): Field
+
+data class SimpleField(
+    override val fieldName: String,
+    val fieldType: Lazy<Type>,
+    override val isPrimitive: Boolean = true,
+): Field
 

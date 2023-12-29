@@ -1,0 +1,82 @@
+package com.zachary_moore.ktql
+
+sealed interface KTQLType<TYPE: KTQLType<TYPE>>
+
+interface TerminalKTQLType<TYPE: KTQLType<TYPE>>: KTQLType<TYPE>
+
+interface ObjectKTQLType<TYPE: KTQLType<TYPE>>: KTQLType<TYPE> {
+    val allFields: List<Field<TYPE, *>>
+}
+
+sealed class Field<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>> {
+    abstract val gqlRepresentation: String
+}
+
+class SimpleField<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>>(
+    override val gqlRepresentation: String
+): Field<PARENT, TYPE>()
+
+class ComplexField<PARENT: KTQLType<PARENT>, TYPE: KTQLType<TYPE>>(
+    override val gqlRepresentation: String,
+    val fields: List<Field<TYPE, *>>
+): Field<PARENT, TYPE>()
+
+class KTQL {
+    private val selections = arrayListOf<Field<*, *>>()
+    val selected: List<Field<*, *>>
+            get() = selections.toList()
+    #foreach ( $query in $schema.queries)
+
+    fun ${query.name}Query(init: ${query.name}Query.() -> Unit) {
+        val operation = ${query.name}Query()
+        operation.init()
+        selections.addAll(operation.selections)
+    }
+    #end
+}
+
+fun ktql(init: KTQL.() -> Unit): KTQL {
+    val ktql = KTQL()
+    ktql.init()
+    return ktql
+}
+
+abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {
+    val selections = arrayListOf<Field<RESULTANT_TYPE, *>>()
+}
+
+#foreach ( $query in $schema.queries)
+class ${query.name}Query: KTQLOperation<${query.resultantType.value.name}>()
+#end
+
+#foreach ($type in $schema.types)
+  #if ($type.fields.size == 0)
+class ${type.name} : TerminalKTQLType<${type.name}>
+  #else
+class ${type.name} private constructor(): ObjectKTQLType<${type.name}> {
+    companion object {
+        #foreach ($field in $type.fields)
+          #if (! $field.Primitive)
+        fun ${field.fieldName}(innerSelection: () -> List<Field<$field.fieldType.value.name, *>>): ComplexField<${type.name}, $field.fieldType.value.name> {
+            return ComplexField("", innerSelection.invoke())
+        }
+          #else
+        val $field.fieldName : SimpleField<${type.name}, $field.fieldType.value.name> = SimpleField("$field.fieldName")
+          #end
+        #end
+        val allFields =
+            listOf(
+            #foreach ($field in $type.fields)
+                #if ($field.Primitive)
+                $field.fieldName,
+                #else
+                $field.fieldName { ${field.fieldType.value.name}.allFields },
+                #end
+            #end
+            )
+    }
+    override val allFields: List<Field<${type.name}, *>>
+        get() = ${type.name}.allFields
+}
+  #end
+#end

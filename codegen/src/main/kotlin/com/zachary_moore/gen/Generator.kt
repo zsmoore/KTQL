@@ -13,7 +13,6 @@ class Generator(
 
     fun generate() {
         val p = Properties()
-        p.setProperty("file.resource.loader.path", "/Users/zsmoore/dev/KTQL/codegen/src/main/resources/")
         Velocity.init(p)
         val context = VelocityContext()
         context.put("schema", schema)

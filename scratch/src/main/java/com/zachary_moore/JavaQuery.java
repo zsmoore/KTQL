@@ -1,6 +1,6 @@
 package com.zachary_moore;
 
-import com.zachary_moore.engine.KTQL;
+import com.zachary_moore.ktql.engine.KTQL;
 import com.zachary_moore.ktql.ExampleKt;
 import com.zachary_moore.ktql.User;
 import kotlin.Unit;

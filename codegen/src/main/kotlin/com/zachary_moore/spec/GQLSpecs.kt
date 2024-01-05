@@ -8,12 +8,14 @@ data class Schema(
 
 data class Query(
     val name: String,
-    val resultantType: Lazy<Type>
+    val resultantType: Lazy<Type>,
+    val inputs: List<InputType>,
 )
 
 data class Mutation(
     val name: String,
-    val resultantType: Lazy<Type>
+    val resultantType: Lazy<Type>,
+    val inputs: List<InputType>,
 )
 
 sealed interface Field {
@@ -23,7 +25,13 @@ sealed interface Field {
 
 data class Type(
     val name: String,
-    val fields: List<Field>
+    val fields: List<Field>,
+)
+
+data class InputType(
+    val type: Lazy<Type>,
+    val isList: Boolean = false,
+    val isNonNull: Boolean = false,
 )
 
 data class ComplexField(

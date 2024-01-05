@@ -1,12 +1,12 @@
 package com.zachary_moore
 
 import com.zachary_moore.spec.*
+import com.zachary_moore.spec.Field
+import com.zachary_moore.spec.Type
 import com.zachary_moore.util.getBaseTypeName
 import com.zachary_moore.util.isPrimitive
 import com.zachary_moore.util.unwrapType
-import graphql.language.FieldDefinition
-import graphql.language.ObjectTypeDefinition
-import graphql.language.ScalarTypeDefinition
+import graphql.language.*
 import graphql.schema.idl.TypeDefinitionRegistry
 
 const val QUERY = "Query"
@@ -33,6 +33,7 @@ class SchemaProcessor(
         }.associate { (typeName, typeDefinition) ->
             when (typeDefinition) {
                 is ObjectTypeDefinition -> typeName to processSingleType(typeDefinition)
+                is InputObjectTypeDefinition -> typeName to processSingleInputType(typeDefinition)
                 is ScalarTypeDefinition -> maybePrefixKTQL(typeName) to processSingleScalar(typeDefinition)
                 else -> throw IllegalStateException("Bad state")
             }
@@ -58,6 +59,13 @@ class SchemaProcessor(
         return Type(
             objectTypeDefinition.name,
             processFields(objectTypeDefinition.children.filterIsInstance<FieldDefinition>())
+        )
+    }
+
+    private fun processSingleInputType(inputObjectTypeDefinition: InputObjectTypeDefinition): Type {
+        return Type(
+            inputObjectTypeDefinition.name,
+            processFields(inputObjectTypeDefinition.children.filterIsInstance<FieldDefinition>()) // unnecessary for input types
         )
     }
 
@@ -126,6 +134,22 @@ class SchemaProcessor(
                 requireNotNull(typeCache[returnType]) {
                     "Query return type not found in type cache"
                 }
+            },
+            processInputValueDefinitions(query.inputValueDefinitions)
+        )
+    }
+
+    private fun processInputValueDefinitions(inputValueDefinitions: List<InputValueDefinition>): List<InputType> {
+        return inputValueDefinitions.map { def -> processSingleInputValueDefinition(def) }
+    }
+
+    private fun processSingleInputValueDefinition(inputValueDefinition: InputValueDefinition): InputType{
+        val name = getBaseTypeName(inputValueDefinition.type)
+        return InputType(
+            lazy {
+                requireNotNull(typeCache[name]) {
+                    "Could not find input type for query in type cache"
+                }
             }
         )
     }
@@ -145,7 +169,8 @@ class SchemaProcessor(
                 requireNotNull(typeCache[returnType]) {
                     "Mutation type not found in type cache"
                 }
-            }
+            },
+            processInputValueDefinitions(mutation.inputValueDefinitions)
         )
     }
 }

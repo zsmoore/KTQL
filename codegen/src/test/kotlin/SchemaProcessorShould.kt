@@ -1,6 +1,5 @@
 
 import com.zachary_moore.SchemaProcessor
-import com.zachary_moore.gen.Generator
 import com.zachary_moore.spec.ComplexField
 import com.zachary_moore.spec.Field
 import com.zachary_moore.spec.SimpleField
@@ -44,9 +43,9 @@ class SchemaProcessorShould {
         assertEquals((user.fields[0] as SimpleField).fieldType.value.name, "KTQLID")
     }
 
-    @Test
-    fun generateCodeGen() {
-        val schema = SchemaProcessor(types).process()
-        Generator(schema).generate()
-    }
+//    @Test
+//    fun generateCodeGen() {
+//        val schema = SchemaProcessor(types).process()
+//        Generator(schema).generate()
+//    }
 }

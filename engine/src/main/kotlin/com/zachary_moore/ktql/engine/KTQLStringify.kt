@@ -1,4 +1,4 @@
-package com.zachary_moore.engine
+package com.zachary_moore.ktql.engine
 
 fun stringify(ktql: KTQL): String {
     return ktql.selected.joinToString { stringify(it) }

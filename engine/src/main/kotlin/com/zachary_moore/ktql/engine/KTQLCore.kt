@@ -1,4 +1,4 @@
-package com.zachary_moore.engine
+package com.zachary_moore.ktql.engine
 
 interface KTQL {
     val selected: Set<Field<*, *>>

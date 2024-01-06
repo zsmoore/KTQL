@@ -32,8 +32,11 @@ class SchemaProcessorShould {
         val tweet = schema.queries[0].resultantType.value
         assertEquals(tweet.fields.size, 5)
 
-        val inputName = schema.queries[0].inputs[0].type.value.name
-        assertEquals("ID", inputName)
+        val inputType = schema.queries[0].inputs[0].typeName
+        assertEquals("GraphQLID", inputType)
+
+        val inputVariableName = schema.queries[0].inputs[0].variableName
+        assertEquals("id", inputVariableName)
 
         val userField = tweet.fields.first { field: Field ->
             field is ComplexField && field.fieldType.value.name == "User"

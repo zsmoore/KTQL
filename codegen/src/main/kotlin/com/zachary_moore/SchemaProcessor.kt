@@ -5,6 +5,7 @@ import com.zachary_moore.util.getBaseTypeName
 import com.zachary_moore.util.isPrimitive
 import com.zachary_moore.util.unwrapType
 import graphql.language.FieldDefinition
+import graphql.language.InputValueDefinition
 import graphql.language.ObjectTypeDefinition
 import graphql.language.ScalarTypeDefinition
 import graphql.schema.idl.TypeDefinitionRegistry
@@ -28,8 +29,9 @@ class SchemaProcessor(
 
     private fun generateTypeMap(): Map<String, Type> {
         val allTypes = typeDefinitions.types() + typeDefinitions.scalars()
-        return allTypes.entries.filter { (typeName, _) ->
-            typeName != QUERY && typeName != MUTATION
+        return allTypes.entries.filter { (typeName, type) ->
+            typeName != QUERY && typeName != MUTATION &&
+                    (type is ObjectTypeDefinition || type is ScalarTypeDefinition)
         }.associate { (typeName, typeDefinition) ->
             when (typeDefinition) {
                 is ObjectTypeDefinition -> typeName to processSingleType(typeDefinition)
@@ -50,6 +52,14 @@ class SchemaProcessor(
         var tempTypeName = typeName
         if (isPrimitive(typeName)) {
             tempTypeName = "KTQL$typeName"
+        }
+        return tempTypeName
+    }
+
+    private fun maybePrefixGraphQL(typeName: String): String {
+        var tempTypeName = typeName
+        if (isPrimitive(typeName)) {
+            tempTypeName = "GraphQL$typeName"
         }
         return tempTypeName
     }
@@ -126,7 +136,19 @@ class SchemaProcessor(
                 requireNotNull(typeCache[returnType]) {
                     "Query return type not found in type cache"
                 }
-            }
+            },
+            processInputValueDefinitions(query.inputValueDefinitions)
+        )
+    }
+
+    private fun processInputValueDefinitions(inputValueDefinitions: List<InputValueDefinition>): List<InputType> {
+        return inputValueDefinitions.map { def -> processSingleInputValueDefinition(def) }
+    }
+
+    private fun processSingleInputValueDefinition(inputValueDefinition: InputValueDefinition): InputType{
+        return InputType(
+            inputValueDefinition.name,
+            maybePrefixGraphQL(getBaseTypeName(inputValueDefinition.type))
         )
     }
 
@@ -145,7 +167,8 @@ class SchemaProcessor(
                 requireNotNull(typeCache[returnType]) {
                     "Mutation type not found in type cache"
                 }
-            }
+            },
+            processInputValueDefinitions(mutation.inputValueDefinitions)
         )
     }
 }

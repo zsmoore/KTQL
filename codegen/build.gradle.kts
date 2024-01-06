@@ -9,7 +9,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.apache.velocity:velocity:1.7")
+    implementation("org.apache.velocity:velocity-engine-core:2.3")
     implementation("com.graphql-java:graphql-java:21.3")
     implementation(kotlin("stdlib-jdk8"))
     testImplementation(kotlin("test"))

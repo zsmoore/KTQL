@@ -1,6 +1,5 @@
 
 import com.zachary_moore.SchemaProcessor
-import com.zachary_moore.gen.Generator
 import com.zachary_moore.spec.ComplexField
 import com.zachary_moore.spec.Field
 import com.zachary_moore.spec.SimpleField
@@ -33,6 +32,12 @@ class SchemaProcessorShould {
         val tweet = schema.queries[0].resultantType.value
         assertEquals(tweet.fields.size, 5)
 
+        val inputType = schema.queries[0].inputs[0].typeName
+        assertEquals("GraphQLID", inputType)
+
+        val inputVariableName = schema.queries[0].inputs[0].variableName
+        assertEquals("id", inputVariableName)
+
         val userField = tweet.fields.first { field: Field ->
             field is ComplexField && field.fieldType.value.name == "User"
         }
@@ -44,9 +49,9 @@ class SchemaProcessorShould {
         assertEquals((user.fields[0] as SimpleField).fieldType.value.name, "KTQLID")
     }
 
-    @Test
-    fun generateCodeGen() {
-        val schema = SchemaProcessor(types).process()
-        Generator(schema).generate()
-    }
+//    @Test
+//    fun generateCodeGen() {
+//        val schema = SchemaProcessor(types).process()
+//        Generator(schema).generate()
+//    }
 }

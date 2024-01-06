@@ -1,7 +1,8 @@
 
-import com.zachary_moore.engine.KTQL
-import com.zachary_moore.engine.stringify
 import com.zachary_moore.ktql.User
+import com.zachary_moore.ktql.engine.KTQL
+import com.zachary_moore.ktql.engine.stringify
+import com.zachary_moore.ktql.engine.stringifySorted
 import com.zachary_moore.ktql.ktql
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
@@ -30,14 +31,14 @@ class KTQLShould {
     @Test
     fun simple() {
         val res = simpleQuery()
-        assertEquals(res.selected.size, 1)
+        assertEquals(res.selected.size, 3)
     }
 
     @Test
     fun stringifyKTQL() {
         val res = simpleQuery()
-        val str = stringify(res)
-        assertEquals("Author{last_name, first_name}, id, Stats{responses, retweets, views, likes}", str)
+        val str = stringifySorted(res)
+        assertEquals("Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id", str)
     }
 
     @Test

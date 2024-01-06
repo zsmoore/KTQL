@@ -1,6 +1,6 @@
-package com.zachary_moore.ktql
+package com.zachary_moore.ktql;
 
-import com.zachary_moore.engine.*
+import com.zachary_moore.ktql.engine.*
 
 class KTQLImpl : KTQL {
     private val selections = hashSetOf<Field<*, *>>()

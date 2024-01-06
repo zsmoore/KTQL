@@ -32,8 +32,13 @@ tasks.register("genKTQL", JavaExec::class) {
         file("src/main/resources/schema.graphqls").toPath().toAbsolutePath().toString(),
         buildDir.toPath().resolve("generated/ktql/main/kotlin/com/zachary_moore/ktql/KTQL.kt").toAbsolutePath().toString(),
     )
-    kotlin.sourceSets["main"].kotlin {
-        srcDir(buildDir.toPath().resolve("generated/ktql/main/kotlin"))
+}
+
+sourceSets {
+    main {
+        kotlin {
+            srcDir(buildDir.toPath().resolve("generated/ktql/main/kotlin"))
+        }
     }
 }
 

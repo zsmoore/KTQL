@@ -1,3 +1,5 @@
+package com.zachary_moore.ktql
+
 import com.zachary_moore.ktql.engine.KTQL
 import com.zachary_moore.ktql.engine.KTQLOperation
 import com.zachary_moore.ktql.engine.TerminalKTQLType

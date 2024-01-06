@@ -1,12 +1,13 @@
 package com.zachary_moore
 
 import com.zachary_moore.spec.*
-import com.zachary_moore.spec.Field
-import com.zachary_moore.spec.Type
 import com.zachary_moore.util.getBaseTypeName
 import com.zachary_moore.util.isPrimitive
 import com.zachary_moore.util.unwrapType
-import graphql.language.*
+import graphql.language.FieldDefinition
+import graphql.language.InputValueDefinition
+import graphql.language.ObjectTypeDefinition
+import graphql.language.ScalarTypeDefinition
 import graphql.schema.idl.TypeDefinitionRegistry
 
 const val QUERY = "Query"
@@ -28,12 +29,12 @@ class SchemaProcessor(
 
     private fun generateTypeMap(): Map<String, Type> {
         val allTypes = typeDefinitions.types() + typeDefinitions.scalars()
-        return allTypes.entries.filter { (typeName, _) ->
-            typeName != QUERY && typeName != MUTATION
+        return allTypes.entries.filter { (typeName, type) ->
+            typeName != QUERY && typeName != MUTATION &&
+                    (type is ObjectTypeDefinition || type is ScalarTypeDefinition)
         }.associate { (typeName, typeDefinition) ->
             when (typeDefinition) {
                 is ObjectTypeDefinition -> typeName to processSingleType(typeDefinition)
-                is InputObjectTypeDefinition -> typeName to processSingleInputType(typeDefinition)
                 is ScalarTypeDefinition -> maybePrefixKTQL(typeName) to processSingleScalar(typeDefinition)
                 else -> throw IllegalStateException("Bad state")
             }
@@ -55,17 +56,18 @@ class SchemaProcessor(
         return tempTypeName
     }
 
+    private fun maybePrefixGraphQL(typeName: String): String {
+        var tempTypeName = typeName
+        if (isPrimitive(typeName)) {
+            tempTypeName = "GraphQL$typeName"
+        }
+        return tempTypeName
+    }
+
     private fun processSingleType(objectTypeDefinition: ObjectTypeDefinition): Type {
         return Type(
             objectTypeDefinition.name,
             processFields(objectTypeDefinition.children.filterIsInstance<FieldDefinition>())
-        )
-    }
-
-    private fun processSingleInputType(inputObjectTypeDefinition: InputObjectTypeDefinition): Type {
-        return Type(
-            inputObjectTypeDefinition.name,
-            processFields(inputObjectTypeDefinition.children.filterIsInstance<FieldDefinition>()) // unnecessary for input types
         )
     }
 
@@ -144,13 +146,9 @@ class SchemaProcessor(
     }
 
     private fun processSingleInputValueDefinition(inputValueDefinition: InputValueDefinition): InputType{
-        val name = getBaseTypeName(inputValueDefinition.type)
         return InputType(
-            lazy {
-                requireNotNull(typeCache[name]) {
-                    "Could not find input type for query in type cache"
-                }
-            }
+            inputValueDefinition.name,
+            maybePrefixGraphQL(getBaseTypeName(inputValueDefinition.type))
         )
     }
 

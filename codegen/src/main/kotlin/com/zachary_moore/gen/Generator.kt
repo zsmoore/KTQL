@@ -11,13 +11,14 @@ class Generator(
     private val schema: Schema
 ) {
 
-    fun generate(outputPath: File) {
+    fun generate(outputPath: File,
+                 apolloPackagePrefix: String) {
         val p = Properties()
         p.setProperty("file.resource.loader.path", "/Users/zsmoore/dev/KTQL/codegen/src/main/resources/")
-//        p.setProperty("parser.space_gobbling", "NONE")
         Velocity.init(p)
         val context = VelocityContext()
         context.put("schema", schema)
+        context.put("apolloPrefix", apolloPackagePrefix)
         val template = Velocity.getTemplate("KTQL.vm")
         val writer = StringWriter()
         template.merge(context, writer)

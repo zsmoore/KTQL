@@ -14,7 +14,12 @@ class KTQLImpl : KTQL {
             get() = selections.toSet()
     #foreach ( $query in $schema.queries)
 
-    fun ${query.name}Query(init: ${query.resultantType.value.name}.() -> Unit) {
+    fun ${query.name}Query(
+      #foreach ($input in $query.inputs)
+      ${input.variableName}: ${apolloPrefix}.integration.type.${input.typeName},
+      #end
+      init: ${query.resultantType.value.name}.() -> Unit
+    ) {
         val obj = ${query.resultantType.value.name}()
         obj.init()
         val operation = ${query.name}Query(obj)

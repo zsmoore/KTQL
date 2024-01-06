@@ -18,6 +18,6 @@ public class Runner {
         TypeDefinitionRegistry registry = new SchemaParser().parse(rawSchema);
         Schema schema = new SchemaProcessor(registry).process();
         Generator generator = new Generator(schema);
-        generator.generate(new File(outputPath));
+        generator.generate(new File(outputPath), "com.zachary_moore");
     }
 }

@@ -29,7 +29,8 @@ data class Type(
 )
 
 data class InputType(
-    val type: Lazy<Type>,
+    val variableName: String,
+    val typeName: String,
     val isList: Boolean = false,
     val isNonNull: Boolean = false,
 )

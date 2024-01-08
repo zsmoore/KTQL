@@ -52,7 +52,12 @@ type Query {
 }
 
 input Obj {
-    abc: String
+    someString: String
+    innerObj: InnerObj
+}
+
+input InnerObj {
+    someInt: Int
 }
 
 type Mutation {

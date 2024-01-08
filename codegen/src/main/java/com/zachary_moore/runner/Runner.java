@@ -2,6 +2,7 @@ package com.zachary_moore.runner;
 
 import com.zachary_moore.SchemaProcessor;
 import com.zachary_moore.gen.Generator;
+import com.zachary_moore.gen.KTQLMode;
 import com.zachary_moore.spec.Schema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
@@ -18,6 +19,10 @@ public class Runner {
         TypeDefinitionRegistry registry = new SchemaParser().parse(rawSchema);
         Schema schema = new SchemaProcessor(registry).process();
         Generator generator = new Generator(schema);
-        generator.generate(new File(outputPath), "com.zachary_moore");
+        generator.generate(
+                new File(outputPath),
+                "com.zachary_moore",
+                KTQLMode.INLINE_TRANSLATION
+        );
     }
 }

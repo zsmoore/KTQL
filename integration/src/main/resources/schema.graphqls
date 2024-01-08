@@ -48,7 +48,7 @@ type Query {
     Notifications(limit: Int): [Notification]
     NotificationsMeta: Meta
     SomeQuery(obj: Obj): Tweet
-    BatchTweet(id: [ID]!): Tweet
+    BatchTweet(ids: [ID]!): Tweet
 }
 
 input Obj {

@@ -7,6 +7,8 @@ repositories {
 }
 
 dependencies {
+    implementation(kotlin("reflect"))
+    implementation("com.apollographql.apollo3:apollo-api:3.8.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 

@@ -1,4 +1,7 @@
 
+import com.apollographql.apollo3.api.Optional
+import com.zachary_moore.integration.type.InnerObj
+import com.zachary_moore.integration.type.Obj
 import com.zachary_moore.ktql.User
 import com.zachary_moore.ktql.engine.KTQL
 import com.zachary_moore.ktql.engine.stringify
@@ -32,6 +35,29 @@ class KTQLShould {
     fun simple() {
         val res = simpleQuery()
         assertEquals(res.selected.size, 1)
+    }
+
+    @Test
+    fun objectInput() {
+        val res = ktql {
+            SomeQueryQuery(obj = Obj(Optional.present("abc"))) {
+                id()
+            }
+        }
+        val str = stringifySorted(res)
+        assertEquals("SomeQuery(obj : {someString : \"abc\"}) {id}", str)
+    }
+
+    @Test
+    fun innerObject() {
+        val res = ktql {
+            SomeQueryQuery(obj = Obj(
+                Optional.present("abc"),
+                Optional.present(InnerObj(Optional.present(10)))
+            )) { id() }
+        }
+        val str = stringifySorted(res)
+        assertEquals("SomeQuery(obj : {innerObj : {someInt : 10}, someString : \"abc\"}) {id}", str)
     }
 
     @Test

@@ -1,11 +1,12 @@
 package com.zachary_moore.ktql.engine
 
 interface KTQL {
-    val selected: Set<Field<*, *>>
+    val selected: Set<KTQLOperation<*>>
 }
 
 abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {
     val selections = hashSetOf<Field<RESULTANT_TYPE, *>>()
+    abstract val gqlRepresentation: String
 }
 
 sealed interface KTQLType<TYPE: KTQLType<TYPE>>

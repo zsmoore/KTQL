@@ -30,8 +30,13 @@ private fun isList(type: Type<*>): Boolean {
     return type is ListType
 }
 
-private fun isNonNull(type: Type<*>): Boolean {
+fun isNonNull(type: Type<*>): Boolean {
     return type is NonNullType
+}
+
+fun isWrappedListOrList(type: Type<*>): Boolean {
+    return type is ListType ||
+            (type is NonNullType && type.type is ListType)
 }
 
 private fun unwrap(type: Type<*>): Type<*> {

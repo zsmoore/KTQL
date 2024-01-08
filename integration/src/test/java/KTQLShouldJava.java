@@ -1,15 +1,16 @@
-package com.zachary_moore;
-
+import com.zachary_moore.ktql.KTQLKt;
 import com.zachary_moore.ktql.engine.KTQL;
-import com.zachary_moore.ktql.ExampleKt;
 import com.zachary_moore.ktql.User;
+import com.zachary_moore.ktql.engine.KTQLStringifyKt;
 import kotlin.Unit;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-public class JavaQuery {
+public class KTQLShouldJava {
 
-    public static KTQL simpleQuery() {
-        return ExampleKt.ktql( ktql -> {
-            ktql.TweetQuery( tweet -> {
+    private static KTQL simpleQuery() {
+        return KTQLKt.ktql(ktql -> {
+            ktql.TweetQuery(null, tweet -> {
                 tweet.id();
                 tweet.Author( author -> {
                     author.last_name();
@@ -29,5 +30,12 @@ public class JavaQuery {
 
     private static void simpleUser(User user) {
         user.first_name();
+    }
+
+    @Test
+    public void stringifyKTQLJava() {
+        KTQL res = simpleQuery();
+        String result = KTQLStringifyKt.stringifySorted(res);
+        Assertions.assertEquals("Tweet(id: ID) { Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id}", result);
     }
 }

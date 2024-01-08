@@ -14,6 +14,7 @@ dependencies {
     implementation("com.graphql-java:graphql-java:21.3")
     implementation(project(":engine"))
     implementation("com.apollographql.apollo3:apollo-runtime")
+    testImplementation(kotlin("test"))
 }
 
 tasks.test {

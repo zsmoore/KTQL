@@ -13,22 +13,22 @@ class KTQLImpl : KTQL {
     private val selections = hashSetOf<KTQLOperation<*>>()
     override val selected: Set<KTQLOperation<*>>
             get() = selections.toSet()
-    #foreach ( $query in $schema.queries)
+    #foreach ( $operation in $schema.operations)
 
-    fun ${query.name}Query(
-      #foreach ($input in $query.inputs)
+    fun ${operation.name}Operation(
+      #foreach ($input in $operation.inputs)
         #if ($input.Primitive)
       ${input.variableName}: ${input.ktTypeName}#if(!$input.NonNull)? = null#end,
         #else
       ${input.variableName}: ${apolloPrefix}.integration.type.${input.ktTypeName}#if(!$input.NonNull)? = null#end,
         #end
       #end
-      init: ${query.resultantType.value.name}.() -> Unit
+      init: ${operation.resultantType.value.name}.() -> Unit
     ) {
-        val resultantObj = ${query.resultantType.value.name}()
+        val resultantObj = ${operation.resultantType.value.name}()
         resultantObj.init()
-        val operation = ${query.name}Query(resultantObj)
-        #foreach ($input in $query.inputs)
+        val operation = ${operation.name}Operation(resultantObj)
+        #foreach ($input in $operation.inputs)
         operation.inputs["$input.variableName"] = $input.variableName
         #end
         selections.add(operation)
@@ -42,11 +42,11 @@ fun ktql(init: KTQLImpl.() -> Unit): KTQL {
     return ktql
 }
 
-#foreach ( $query in $schema.queries)
-class ${query.name}Query(
-    resultantObj: ${query.resultantType.value.name}
-): KTQLOperation<${query.resultantType.value.name}>() {
-    override val gqlRepresentation = "$query.name"
+#foreach ( $operation in $schema.operations)
+class ${operation.name}Operation(
+    resultantObj: ${operation.resultantType.value.name}
+): KTQLOperation<${operation.resultantType.value.name}>() {
+    override val gqlRepresentation = "$operation.name"
     init {
         selections.addAll(resultantObj.selected)
     }

@@ -24,18 +24,16 @@ class SchemaProcessorShould {
     @Test
     fun parseTestSchema() {
         val schema = SchemaProcessor(types).process()
-        assertEquals(schema.queries.size, 6)
-        assertEquals(schema.mutations.size, 3)
-        assertEquals(schema.queries[0].name, "Tweet")
-        assertEquals(schema.mutations[0].name, "createTweet")
+        assertEquals(schema.operations.size, 9)
+        assertEquals(schema.operations[0].name, "Tweet")
 
-        val tweet = schema.queries[0].resultantType.value
+        val tweet = schema.operations[0].resultantType.value
         assertEquals(tweet.fields.size, 5)
 
-        val inputType = schema.queries[0].inputs[0].ktTypeName
+        val inputType = schema.operations[0].inputs[0].ktTypeName
         assertEquals("String", inputType)
 
-        val inputVariableName = schema.queries[0].inputs[0].variableName
+        val inputVariableName = schema.operations[0].inputs[0].variableName
         assertEquals("id", inputVariableName)
 
         val userField = tweet.fields.first { field: Field ->

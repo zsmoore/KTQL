@@ -65,5 +65,5 @@ type Mutation {
         body: String
     ): Tweet
     deleteTweet(id: ID!): Tweet
-    markTweetRead(id: ID!): Boolean
+    markTweetRead(id: ID!): Tweet
 }

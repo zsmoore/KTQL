@@ -112,22 +112,21 @@ class SchemaProcessor(
             IllegalStateException("Could not find Mutation object in Schema")
         } as ObjectTypeDefinition
         return Schema(
-            processQueries(query),
-            processMutations(mutation),
+            listOf(processQueries(query), processMutations(mutation)).flatten(),
             typeCache.values.toList()
         )
     }
 
-    private fun processQueries(queryDefinition: ObjectTypeDefinition): List<Query> {
+    private fun processQueries(queryDefinition: ObjectTypeDefinition): List<Operation> {
         return queryDefinition.children.map { child ->
             require(child is FieldDefinition)
             processSingleQuery(child)
         }
     }
 
-    private fun processSingleQuery(query: FieldDefinition): Query {
+    private fun processSingleQuery(query: FieldDefinition): Operation {
         val returnType = getBaseTypeName(query.type)
-        return Query(
+        return Operation(
             query.name,
             lazy {
                 requireNotNull(typeCache[returnType]) {
@@ -155,16 +154,16 @@ class SchemaProcessor(
         )
     }
 
-    private fun processMutations(mutationDefinition: ObjectTypeDefinition): List<Mutation> {
+    private fun processMutations(mutationDefinition: ObjectTypeDefinition): List<Operation> {
         return mutationDefinition.children.map { child ->
             require(child is FieldDefinition)
             processSingleMutation(child)
         }
     }
 
-    private fun processSingleMutation(mutation: FieldDefinition): Mutation {
+    private fun processSingleMutation(mutation: FieldDefinition): Operation {
         val returnType = getBaseTypeName(mutation.type)
-        return Mutation(
+        return Operation(
             mutation.name,
             lazy {
                 requireNotNull(typeCache[returnType]) {

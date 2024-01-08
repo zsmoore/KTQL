@@ -9,9 +9,21 @@ fun stringifySorted(ktql: KTQL): String {
 }
 
 private fun stringify(ktqlOperation: KTQLOperation<*>, sorted: Boolean = false): String {
-    return "${ktqlOperation.gqlRepresentation} { " +
-            ktqlOperation.selections.toSortedSet(fieldComparator()).joinToString { stringify(it, sorted = sorted) } +
-            "}"
+    return if(ktqlOperation.inputs.filter { (_, value) -> value != null }.isNotEmpty()) {
+        val inputMap = if (sorted) ktqlOperation.inputs.toSortedMap() else ktqlOperation.inputs
+        "${ktqlOperation.gqlRepresentation}(" +
+                inputMap.filter { (_, value) ->
+                    value != null
+                }.map { (key, value) ->
+                    "$key : $value"
+                }.joinToString(separator = ", ") + ") {" +
+                ktqlOperation.selections.toSortedSet(fieldComparator()).joinToString { stringify(it, sorted = sorted) } +
+                "}"
+    } else {
+        "${ktqlOperation.gqlRepresentation} {" +
+                ktqlOperation.selections.toSortedSet(fieldComparator()).joinToString { stringify(it, sorted = sorted) } +
+                "}"
+    }
 }
 
 private fun fieldComparator(): Comparator<Field<*, *>> {

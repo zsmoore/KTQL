@@ -36,6 +36,6 @@ public class KTQLShouldJava {
     public void stringifyKTQLJava() {
         KTQL res = simpleQuery();
         String result = KTQLStringifyKt.stringifySorted(res);
-        Assertions.assertEquals("Tweet(id: ID) { Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id}", result);
+        Assertions.assertEquals("Tweet {Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id}", result);
     }
 }

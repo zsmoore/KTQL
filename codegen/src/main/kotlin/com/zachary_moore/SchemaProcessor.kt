@@ -127,7 +127,6 @@ class SchemaProcessor(
 
     private fun processSingleQuery(query: FieldDefinition): Query {
         val returnType = getBaseTypeName(query.type)
-        val inputValues = processInputValueDefinitions(query.inputValueDefinitions)
         return Query(
             query.name,
             lazy {
@@ -135,8 +134,7 @@ class SchemaProcessor(
                     "Query return type not found in type cache"
                 }
             },
-            inputValues,
-            generateQueryGQLRepresentation(query.name, inputValues)
+            processInputValueDefinitions(query.inputValueDefinitions)
         )
     }
 
@@ -175,21 +173,6 @@ class SchemaProcessor(
             },
             processInputValueDefinitions(mutation.inputValueDefinitions)
         )
-    }
-
-    private fun generateQueryGQLRepresentation(queryName: String, inputValues: List<InputType>): String {
-        if (inputValues.isEmpty()) {
-            return queryName
-        }
-        var gqlRepresentation = "$queryName("
-        for (i in inputValues.indices) {
-            val inputType = inputValues[i]
-            gqlRepresentation += "${inputType.variableName}: ${inputType.gqlTypeName}"
-            if (inputType.isNonNull) gqlRepresentation += "!"
-            if (i < inputValues.size - 1) gqlRepresentation += ", "
-        }
-        gqlRepresentation += ")"
-        return gqlRepresentation
     }
 
     private fun generateGQLTypeName(baseType: String, isList: Boolean): String {

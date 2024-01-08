@@ -21,7 +21,7 @@ class Generator(
         context.put("schema", schema)
         context.put("apolloPrefix", apolloPackagePrefix)
         context.put("KTQLMODE", ktqlMode.toString())
-        val template = Velocity.getTemplate("KTQL.vm")
+        val template = Velocity.getTemplate("KTQL_INLINE.vm")
         val writer = StringWriter()
         template.merge(context, writer)
         outputPath.parentFile.mkdirs()

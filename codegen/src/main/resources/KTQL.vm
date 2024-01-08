@@ -1,3 +1,4 @@
+#set($d = "\$")
 package com.zachary_moore.ktql
 
 import com.zachary_moore.ktql.engine.KTQL
@@ -9,21 +10,25 @@ import com.zachary_moore.ktql.engine.SimpleField
 import com.zachary_moore.ktql.engine.ComplexField
 
 class KTQLImpl : KTQL {
-    private val selections = hashSetOf<Field<*, *>>()
-    override val selected: Set<Field<*, *>>
+    private val selections = hashSetOf<KTQLOperation<*>>()
+    override val selected: Set<KTQLOperation<*>>
             get() = selections.toSet()
     #foreach ( $query in $schema.queries)
 
     fun ${query.name}Query(
       #foreach ($input in $query.inputs)
-      ${input.variableName}: ${apolloPrefix}.integration.type.${input.typeName},
+        #if ($input.Primitive)
+      ${input.variableName}: ${input.ktTypeName}#if(!$input.NonNull)? = null#end,
+        #else
+      ${input.variableName}: ${apolloPrefix}.integration.type.${input.ktTypeName}#if(!$input.NonNull)? = null#end,
+        #end
       #end
       init: ${query.resultantType.value.name}.() -> Unit
     ) {
-        val obj = ${query.resultantType.value.name}()
-        obj.init()
-        val operation = ${query.name}Query(obj)
-        selections.addAll(operation.selections)
+        val resultantObj = ${query.resultantType.value.name}()
+        resultantObj.init()
+        val operation = ${query.name}Query(resultantObj)
+        selections.add(operation)
     }
     #end
 }
@@ -36,10 +41,11 @@ fun ktql(init: KTQLImpl.() -> Unit): KTQL {
 
 #foreach ( $query in $schema.queries)
 class ${query.name}Query(
-    obj: ${query.resultantType.value.name}
+    resultantObj: ${query.resultantType.value.name}
 ): KTQLOperation<${query.resultantType.value.name}>() {
+    override val gqlRepresentation = "$query.gqlRepresentation"
     init {
-        selections.addAll(obj.selected)
+        selections.addAll(resultantObj.selected)
     }
 }
 #end

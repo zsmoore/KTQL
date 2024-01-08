@@ -31,14 +31,14 @@ class KTQLShould {
     @Test
     fun simple() {
         val res = simpleQuery()
-        assertEquals(res.selected.size, 3)
+        assertEquals(res.selected.size, 1)
     }
 
     @Test
     fun stringifyKTQL() {
         val res = simpleQuery()
         val str = stringifySorted(res)
-        assertEquals("Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id", str)
+        assertEquals("Tweets(limit: Int, skip: Int, sort_field: String, sort_order: String) { Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id}", str)
     }
 
     @Test
@@ -50,6 +50,6 @@ class KTQLShould {
             }
         }
         val str = stringify(res)
-        assertEquals("id", str)
+        assertEquals("Tweets(limit: Int, skip: Int, sort_field: String, sort_order: String) { id}", str)
     }
 }

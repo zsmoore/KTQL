@@ -32,8 +32,8 @@ class SchemaProcessorShould {
         val tweet = schema.queries[0].resultantType.value
         assertEquals(tweet.fields.size, 5)
 
-        val inputType = schema.queries[0].inputs[0].typeName
-        assertEquals("GraphQLID", inputType)
+        val inputType = schema.queries[0].inputs[0].ktTypeName
+        assertEquals("String", inputType)
 
         val inputVariableName = schema.queries[0].inputs[0].variableName
         assertEquals("id", inputVariableName)

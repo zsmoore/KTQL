@@ -10,6 +10,7 @@ data class Query(
     val name: String,
     val resultantType: Lazy<Type>,
     val inputs: List<InputType>,
+    val gqlRepresentation: String,
 )
 
 data class Mutation(
@@ -30,9 +31,11 @@ data class Type(
 
 data class InputType(
     val variableName: String,
-    val typeName: String,
-    val isList: Boolean = false,
-    val isNonNull: Boolean = false,
+    val gqlTypeName: String,
+    val ktTypeName: String,
+    val isPrimitive: Boolean,
+    val isList: Boolean,
+    val isNonNull: Boolean,
 )
 
 data class ComplexField(

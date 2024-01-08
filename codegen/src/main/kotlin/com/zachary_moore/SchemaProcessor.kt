@@ -1,9 +1,7 @@
 package com.zachary_moore
 
 import com.zachary_moore.spec.*
-import com.zachary_moore.util.getBaseTypeName
-import com.zachary_moore.util.isPrimitive
-import com.zachary_moore.util.unwrapType
+import com.zachary_moore.util.*
 import graphql.language.FieldDefinition
 import graphql.language.InputValueDefinition
 import graphql.language.ObjectTypeDefinition
@@ -56,12 +54,11 @@ class SchemaProcessor(
         return tempTypeName
     }
 
-    private fun maybePrefixGraphQL(typeName: String): String {
-        var tempTypeName = typeName
-        if (isPrimitive(typeName)) {
-            tempTypeName = "GraphQL$typeName"
+    private fun maybeCoerceID(typeName: String): String {
+        if (typeName == "ID") {
+            return "String"
         }
-        return tempTypeName
+        return typeName
     }
 
     private fun processSingleType(objectTypeDefinition: ObjectTypeDefinition): Type {
@@ -130,6 +127,7 @@ class SchemaProcessor(
 
     private fun processSingleQuery(query: FieldDefinition): Query {
         val returnType = getBaseTypeName(query.type)
+        val inputValues = processInputValueDefinitions(query.inputValueDefinitions)
         return Query(
             query.name,
             lazy {
@@ -137,7 +135,8 @@ class SchemaProcessor(
                     "Query return type not found in type cache"
                 }
             },
-            processInputValueDefinitions(query.inputValueDefinitions)
+            inputValues,
+            generateQueryGQLRepresentation(query.name, inputValues)
         )
     }
 
@@ -146,9 +145,15 @@ class SchemaProcessor(
     }
 
     private fun processSingleInputValueDefinition(inputValueDefinition: InputValueDefinition): InputType{
+        val isList = isWrappedListOrList(inputValueDefinition.type)
+        val baseType = getBaseTypeName(inputValueDefinition.type)
         return InputType(
             inputValueDefinition.name,
-            maybePrefixGraphQL(getBaseTypeName(inputValueDefinition.type))
+            generateGQLTypeName(baseType, isList),
+            maybeCoerceID(getBaseTypeName(inputValueDefinition.type)),
+            isPrimitive(unwrapType(inputValueDefinition.type)),
+            isNonNull(inputValueDefinition.type),
+            isList
         )
     }
 
@@ -170,5 +175,28 @@ class SchemaProcessor(
             },
             processInputValueDefinitions(mutation.inputValueDefinitions)
         )
+    }
+
+    private fun generateQueryGQLRepresentation(queryName: String, inputValues: List<InputType>): String {
+        if (inputValues.isEmpty()) {
+            return queryName
+        }
+        var gqlRepresentation = "$queryName("
+        for (i in inputValues.indices) {
+            val inputType = inputValues[i]
+            gqlRepresentation += "${inputType.variableName}: ${inputType.gqlTypeName}"
+            if (inputType.isNonNull) gqlRepresentation += "!"
+            if (i < inputValues.size - 1) gqlRepresentation += ", "
+        }
+        gqlRepresentation += ")"
+        return gqlRepresentation
+    }
+
+    private fun generateGQLTypeName(baseType: String, isList: Boolean): String {
+        return if (isList) {
+            "[$baseType]"
+        } else {
+            baseType
+        }
     }
 }

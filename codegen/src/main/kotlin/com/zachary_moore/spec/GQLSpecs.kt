@@ -1,12 +1,11 @@
 package com.zachary_moore.spec
 
 data class Schema(
-    val queries: List<Query>,
-    val mutations: List<Mutation>,
+    val operations: List<Operation>,
     val types: List<Type>
 )
 
-data class Query(
+data class Operation(
     val name: String,
     val resultantType: Lazy<Type>,
     val inputs: List<InputType>,

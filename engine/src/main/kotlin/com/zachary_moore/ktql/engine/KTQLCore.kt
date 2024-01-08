@@ -6,6 +6,7 @@ interface KTQL {
 
 abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {
     val selections = hashSetOf<Field<RESULTANT_TYPE, *>>()
+    val inputs = hashMapOf<String, Any?>()
     abstract val gqlRepresentation: String
 }
 

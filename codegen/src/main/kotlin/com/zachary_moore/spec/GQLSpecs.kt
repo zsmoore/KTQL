@@ -10,7 +10,6 @@ data class Query(
     val name: String,
     val resultantType: Lazy<Type>,
     val inputs: List<InputType>,
-    val gqlRepresentation: String,
 )
 
 data class Mutation(

@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm")
+    java
     id("com.google.devtools.ksp") version "1.9.21-1.0.15"
     id("com.apollographql.apollo3").version("4.0.0-beta.1")
 }

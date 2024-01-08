@@ -28,6 +28,9 @@ class KTQLImpl : KTQL {
         val resultantObj = ${query.resultantType.value.name}()
         resultantObj.init()
         val operation = ${query.name}Query(resultantObj)
+        #foreach ($input in $query.inputs)
+        operation.inputs["$input.variableName"] = $input.variableName
+        #end
         selections.add(operation)
     }
     #end
@@ -43,7 +46,7 @@ fun ktql(init: KTQLImpl.() -> Unit): KTQL {
 class ${query.name}Query(
     resultantObj: ${query.resultantType.value.name}
 ): KTQLOperation<${query.resultantType.value.name}>() {
-    override val gqlRepresentation = "$query.gqlRepresentation"
+    override val gqlRepresentation = "$query.name"
     init {
         selections.addAll(resultantObj.selected)
     }

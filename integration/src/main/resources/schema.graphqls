@@ -49,15 +49,18 @@ type Query {
     NotificationsMeta: Meta
     SomeQuery(obj: Obj): Tweet
     BatchTweet(ids: [ID]!): Tweet
+    BatchObj(objs: [Obj]!): Tweet
 }
 
 input Obj {
     someString: String
     innerObj: InnerObj
+    innerList: [String]
 }
 
 input InnerObj {
     someInt: Int
+    someList: [Int]
 }
 
 type Mutation {

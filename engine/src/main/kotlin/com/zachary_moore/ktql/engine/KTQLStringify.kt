@@ -67,8 +67,13 @@ private fun convertValue(any: Any?): Any {
         is Boolean -> any
         is Int -> any
         is Float -> any
+        is List<*> -> convertList(any)
         else -> convertApolloObject(any)
     }
+}
+
+private fun convertList(anyList: List<*>): String {
+    return "[" + anyList.map { convertValue(it) }.joinToString(", ") + "]"
 }
 
 private fun convertApolloObject(any: Any?): String {
@@ -88,6 +93,8 @@ private fun convertApolloObject(any: Any?): String {
     }.joinToString(separator = ", ") { memberPair ->
         if (memberPair.second is String) {
             "${memberPair.first} : \"${memberPair.second}\""
+        } else if (memberPair.second is List<*>) {
+            "${memberPair.first} : ${convertList(memberPair.second as List<*>)}"
         } else if (!isPrimitive(memberPair.second)) {
             "${memberPair.first} : ${convertApolloObject(memberPair.second)}"
         } else {

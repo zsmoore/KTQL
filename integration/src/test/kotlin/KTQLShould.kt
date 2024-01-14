@@ -80,6 +80,50 @@ class KTQLShould {
     }
 
     @Test
+    fun stringifyListInput() {
+        val res = ktql {
+            BatchObjQuery(
+                listOf(
+                    Obj(
+                        Optional.present(
+                            "abc"
+                        )
+                    ),
+                    Obj(
+                        Optional.present(
+                            "def"
+                        )
+                    ),
+                )
+            ) {
+                id()
+            }
+        }
+        val str = stringifySorted(res)
+        assertEquals("query {BatchObj(objs : [{someString : \"abc\"}, {someString : \"def\"}]) {id}}", str)
+    }
+
+    @Test
+    fun stringifyListInputWithObjWithList() {
+        val res = ktql {
+            BatchObjQuery(listOf(
+                Obj(
+                    innerObj = Optional.present(
+                        InnerObj(
+                            someList = Optional.present(listOf(1, 2))
+                        )
+                    ),
+                    innerList = Optional.present(listOf("abc", "def"))
+                )
+            )) {
+                id()
+            }
+        }
+        val str = stringifySorted(res)
+        assertEquals("query {BatchObj(objs : [{innerList : [abc, def], innerObj : {someList : [1, 2]}}]) {id}}", str)
+    }
+
+    @Test
     fun avoidMixingOperations() {
         assertFails("Mix of queries and mutations in KTQL. Can only have single type of operation") {
             ktql {

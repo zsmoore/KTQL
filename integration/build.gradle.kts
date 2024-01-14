@@ -31,8 +31,8 @@ tasks.register("genKTQL", JavaExec::class) {
     main = "com.zachary_moore.runner.Runner"
     file(buildDir.toPath().resolve("generated/ktql/main/kotlin")).mkdirs()
     args = listOf(
-        file("src/main/resources/schema.graphqls").toPath().toAbsolutePath().toString(),
-        buildDir.toPath().resolve("generated/ktql/main/kotlin/com/zachary_moore/ktql/KTQL.kt").toAbsolutePath().toString(),
+        file("src/test/resources/schema.graphqls").toPath().toAbsolutePath().toString(),
+        buildDir.toPath().resolve("generated/ktql/main/kotlin/com/zachary_moore/ktql/").toAbsolutePath().toString(),
     )
 }
 
@@ -48,7 +48,7 @@ apollo {
     service("service") {
         packageName.set("com.zachary_moore.integration")
         alwaysGenerateTypesMatching.add(".*")
-        schemaFile.set(file("src/main/resources/schema.graphqls"))
+        schemaFile.set(file("src/test/resources/schema.graphqls"))
     }
 }
 

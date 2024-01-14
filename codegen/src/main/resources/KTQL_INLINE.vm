@@ -18,9 +18,9 @@ class KTQLImpl : KTQL {
     fun ${operation.name}#if($operation.type.name() == "MUTATION")Mutation#{else}Query#end(
       #foreach ($input in $operation.inputs)
         #if ($input.Primitive)
-      ${input.variableName}: ${input.ktTypeName}#if(!$input.NonNull)? = null#end,
+      ${input.variableName}: #if($input.List)List<#{end}${input.ktTypeName}#if($input.List)>#{end}#if(!$input.NonNull)? = null#end,
         #else
-      ${input.variableName}: ${apolloPrefix}.integration.type.${input.ktTypeName}#if(!$input.NonNull)? = null#end,
+      ${input.variableName}: #if($input.List)List<#{end}${apolloPrefix}.integration.type.${input.ktTypeName}#if($input.List)>#{end}#if(!$input.NonNull)? = null#end,
         #end
       #end
       init: ${operation.resultantType.value.name}.() -> Unit

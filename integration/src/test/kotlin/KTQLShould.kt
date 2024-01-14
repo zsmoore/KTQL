@@ -9,6 +9,7 @@ import com.zachary_moore.ktql.engine.stringifySorted
 import com.zachary_moore.ktql.ktql
 import org.junit.jupiter.api.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFails
 
 class KTQLShould {
 
@@ -45,7 +46,7 @@ class KTQLShould {
             }
         }
         val str = stringifySorted(res)
-        assertEquals("SomeQuery(obj : {someString : \"abc\"}) {id}", str)
+        assertEquals("query {SomeQuery(obj : {someString : \"abc\"}) {id}}", str)
     }
 
     @Test
@@ -57,14 +58,35 @@ class KTQLShould {
             )) { id() }
         }
         val str = stringifySorted(res)
-        assertEquals("SomeQuery(obj : {innerObj : {someInt : 10}, someString : \"abc\"}) {id}", str)
+        assertEquals("query {SomeQuery(obj : {innerObj : {someInt : 10}, someString : \"abc\"}) {id}}", str)
     }
 
     @Test
     fun stringifyKTQL() {
         val res = simpleQuery()
         val str = stringifySorted(res)
-        assertEquals("Tweets(limit : 10) {Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id}", str)
+        assertEquals("query {Tweets(limit : 10) {Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id}}", str)
+    }
+
+    @Test
+    fun stringifyKTQLMutation() {
+        val res = ktql {
+            markTweetReadMutation("12") {
+                id()
+            }
+        }
+        val str = stringifySorted(res)
+        assertEquals("mutation {markTweetRead(id : 12) {id}}", str)
+    }
+
+    @Test
+    fun avoidMixingOperations() {
+        assertFails("Mix of queries and mutations in KTQL. Can only have single type of operation") {
+            ktql {
+                TweetsMetaQuery { count() }
+                markTweetReadMutation("12") { id() }
+            }
+        }
     }
 
     @Test
@@ -76,6 +98,6 @@ class KTQLShould {
             }
         }
         val str = stringify(res)
-        assertEquals("Tweets {id}", str)
+        assertEquals("query {Tweets {id}}", str)
     }
 }

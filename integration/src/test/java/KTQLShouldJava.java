@@ -10,7 +10,7 @@ public class KTQLShouldJava {
 
     private static KTQL simpleQuery() {
         return KTQLKt.ktql(ktql -> {
-            ktql.TweetQuery(null, tweet -> {
+            ktql.TweetQuery("12", tweet -> {
                 tweet.id();
                 tweet.Author( author -> {
                     author.last_name();
@@ -36,6 +36,6 @@ public class KTQLShouldJava {
     public void stringifyKTQLJava() {
         KTQL res = simpleQuery();
         String result = KTQLStringifyKt.stringifySorted(res);
-        Assertions.assertEquals("Tweet {Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id}", result);
+        Assertions.assertEquals("query {Tweet(id : 12) {Author{first_name, last_name}, Stats{likes, responses, retweets, views}, id}}", result);
     }
 }

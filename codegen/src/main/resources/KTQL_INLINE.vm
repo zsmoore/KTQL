@@ -1,10 +1,10 @@
-#set($d = "\$")
 package com.zachary_moore.ktql
 
 import com.zachary_moore.ktql.engine.KTQL
 import com.zachary_moore.ktql.engine.KTQLOperation
 import com.zachary_moore.ktql.engine.TerminalKTQLType
 import com.zachary_moore.ktql.engine.ObjectKTQLType
+import com.zachary_moore.ktql.engine.OperationType
 import com.zachary_moore.ktql.engine.Field
 import com.zachary_moore.ktql.engine.SimpleField
 import com.zachary_moore.ktql.engine.ComplexField
@@ -15,7 +15,7 @@ class KTQLImpl : KTQL {
             get() = selections.toSet()
     #foreach ( $operation in $schema.operations)
 
-    fun ${operation.name}Operation(
+    fun ${operation.name}#if($operation.type.name() == "MUTATION")Mutation#{else}Query#end(
       #foreach ($input in $operation.inputs)
         #if ($input.Primitive)
       ${input.variableName}: ${input.ktTypeName}#if(!$input.NonNull)? = null#end,
@@ -27,7 +27,7 @@ class KTQLImpl : KTQL {
     ) {
         val resultantObj = ${operation.resultantType.value.name}()
         resultantObj.init()
-        val operation = ${operation.name}Operation(resultantObj)
+        val operation = ${operation.name}#if($operation.type.name() == "MUTATION")Mutation#{else}Query#end(resultantObj)
         #foreach ($input in $operation.inputs)
         operation.inputs["$input.variableName"] = $input.variableName
         #end
@@ -39,14 +39,18 @@ class KTQLImpl : KTQL {
 fun ktql(init: KTQLImpl.() -> Unit): KTQL {
     val ktql = KTQLImpl()
     ktql.init()
+    require(ktql.selected.map { it.type }.distinct().size == 1) {
+      "Mix of queries and mutations in KTQL. Can only have single type of operation"
+    }
     return ktql
 }
 
 #foreach ( $operation in $schema.operations)
-class ${operation.name}Operation(
+class ${operation.name}#if($operation.type.name() == "MUTATION")Mutation#{else}Query#end(
     resultantObj: ${operation.resultantType.value.name}
 ): KTQLOperation<${operation.resultantType.value.name}>() {
     override val gqlRepresentation = "$operation.name"
+    override val type = OperationType.$operation.type
     init {
         selections.addAll(resultantObj.selected)
     }

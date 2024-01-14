@@ -5,11 +5,22 @@ import kotlin.reflect.KProperty1
 import kotlin.reflect.full.memberProperties
 
 fun stringify(ktql: KTQL): String {
-    return ktql.selected.joinToString { stringify(it) }
+    return stringify(ktql, sorted = false)
 }
 
 fun stringifySorted(ktql: KTQL): String {
-    return ktql.selected.joinToString { stringify(it, sorted = true) }
+    return stringify(ktql, sorted = true)
+}
+
+private fun stringify(ktql: KTQL, sorted: Boolean): String {
+    val operationName = when(ktql.selected.first().type) {
+        OperationType.QUERY -> "query"
+        OperationType.MUTATION -> "mutation"
+        OperationType.SUBSCRIPTION -> "subscription"
+    }
+    return "$operationName {" +
+            ktql.selected.joinToString { stringify(it, sorted = sorted) } +
+            "}"
 }
 
 private fun stringify(ktqlOperation: KTQLOperation<*>, sorted: Boolean = false): String {

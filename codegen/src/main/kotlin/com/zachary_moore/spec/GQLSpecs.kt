@@ -9,13 +9,14 @@ data class Operation(
     val name: String,
     val resultantType: Lazy<Type>,
     val inputs: List<InputType>,
+    val type: OperationType
 )
 
-data class Mutation(
-    val name: String,
-    val resultantType: Lazy<Type>,
-    val inputs: List<InputType>,
-)
+enum class OperationType {
+    QUERY,
+    MUTATION,
+    SUBSCRIPTION,
+}
 
 sealed interface Field {
     val fieldName: String

@@ -8,6 +8,13 @@ abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {
     val selections = hashSetOf<Field<RESULTANT_TYPE, *>>()
     val inputs = hashMapOf<String, Any?>()
     abstract val gqlRepresentation: String
+    abstract val type: OperationType
+}
+
+enum class OperationType {
+    QUERY,
+    MUTATION,
+    SUBSCRIPTION,
 }
 
 sealed interface KTQLType<TYPE: KTQLType<TYPE>>

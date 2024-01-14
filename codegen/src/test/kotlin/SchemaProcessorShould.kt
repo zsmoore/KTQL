@@ -46,10 +46,4 @@ class SchemaProcessorShould {
         assertEquals(user.fields[0] is SimpleField, true)
         assertEquals((user.fields[0] as SimpleField).fieldType.value.name, "KTQLID")
     }
-
-//    @Test
-//    fun generateCodeGen() {
-//        val schema = SchemaProcessor(types).process()
-//        Generator(schema).generate()
-//    }
 }

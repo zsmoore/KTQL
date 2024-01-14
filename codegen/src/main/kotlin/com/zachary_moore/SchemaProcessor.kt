@@ -133,7 +133,8 @@ class SchemaProcessor(
                     "Query return type not found in type cache"
                 }
             },
-            processInputValueDefinitions(query.inputValueDefinitions)
+            processInputValueDefinitions(query.inputValueDefinitions),
+            OperationType.QUERY
         )
     }
 
@@ -149,8 +150,8 @@ class SchemaProcessor(
             generateGQLTypeName(baseType, isList),
             maybeCoerceID(getBaseTypeName(inputValueDefinition.type)),
             isPrimitive(unwrapType(inputValueDefinition.type)),
+            isList,
             isNonNull(inputValueDefinition.type),
-            isList
         )
     }
 
@@ -170,7 +171,8 @@ class SchemaProcessor(
                     "Mutation type not found in type cache"
                 }
             },
-            processInputValueDefinitions(mutation.inputValueDefinitions)
+            processInputValueDefinitions(mutation.inputValueDefinitions),
+            OperationType.MUTATION,
         )
     }
 

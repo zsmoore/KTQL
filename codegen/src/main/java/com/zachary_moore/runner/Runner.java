@@ -14,13 +14,13 @@ import java.nio.file.Paths;
 public class Runner {
     public static void main(String[] args) throws Exception {
         String inputPath = args[0];
-        String outputPath = args[1];
+        String outputDir = args[1];
         String rawSchema = new String(Files.readAllBytes(Paths.get(inputPath)));
         TypeDefinitionRegistry registry = new SchemaParser().parse(rawSchema);
         Schema schema = new SchemaProcessor(registry).process();
         Generator generator = new Generator(schema);
         generator.generate(
-                new File(outputPath),
+                new File(outputDir),
                 "com.zachary_moore",
                 KTQLMode.INLINE_TRANSLATION
         );

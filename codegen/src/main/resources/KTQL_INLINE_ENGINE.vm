@@ -1,0 +1,15 @@
+package com.zachary_moore.ktql
+
+import com.zachary_moore.ktql.engine.KTQL
+import com.zachary_moore.ktql.engine.stringify
+import java.util.concurrent.CompletableFuture
+
+class KTQLEngine<T>(
+    private val executeQuery: (String) -> CompletableFuture<T>
+) {
+
+    fun execute(ktql: KTQL): CompletableFuture<T> {
+        return executeQuery(stringify(ktql))
+    }
+
+}

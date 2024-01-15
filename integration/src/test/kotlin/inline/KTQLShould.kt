@@ -1,4 +1,4 @@
-
+package inline
 import com.apollographql.apollo3.api.Optional
 import com.zachary_moore.integration.type.InnerObj
 import com.zachary_moore.integration.type.Obj

@@ -18,7 +18,7 @@ private fun stringify(ktql: KTQL, sorted: Boolean): String {
         OperationType.MUTATION -> "mutation"
         OperationType.SUBSCRIPTION -> "subscription"
     }
-    return "$operationName {" +
+    return "$operationName ${ktql.name ?: ""}{" +
             ktql.selected.joinToString { stringify(it, sorted = sorted) } +
             "}"
 }

@@ -1,0 +1,96 @@
+package com.zachary_moore.ktql.file
+
+import com.zachary_moore.ktql.engine.KTQL
+import com.zachary_moore.ktql.engine.KTQLOperation
+import com.zachary_moore.ktql.engine.TerminalKTQLType
+import com.zachary_moore.ktql.engine.ObjectKTQLType
+import com.zachary_moore.ktql.engine.OperationType
+import com.zachary_moore.ktql.engine.Field
+import com.zachary_moore.ktql.engine.SimpleField
+import com.zachary_moore.ktql.engine.ComplexField
+
+class KTQLImpl(
+  override val name: String
+) : KTQL {
+    private val selections = hashSetOf<KTQLOperation<*>>()
+    override val selected: Set<KTQLOperation<*>>
+            get() = selections.toSet()
+    #foreach ( $operation in $schema.operations)
+
+    fun ${operation.name}#if($operation.type.name() == "MUTATION")Mutation#{else}Query#end(
+      #foreach ($input in $operation.inputs)
+        #if ($input.Primitive)
+      ${input.variableName}: #if($input.List)List<#{end}${input.ktTypeName}#if($input.List)>#{end}#if(!$input.NonNull)? = null#end,
+        #else
+      ${input.variableName}: #if($input.List)List<#{end}${apolloPrefix}.integration.type.${input.ktTypeName}#if($input.List)>#{end}#if(!$input.NonNull)? = null#end,
+        #end
+      #end
+      init: ${operation.resultantType.value.name}.() -> Unit
+    ) {
+        val resultantObj = ${operation.resultantType.value.name}()
+        resultantObj.init()
+        val operation = ${operation.name}#if($operation.type.name() == "MUTATION")Mutation#{else}Query#end(resultantObj)
+        #foreach ($input in $operation.inputs)
+        operation.inputs["$input.variableName"] = $input.variableName
+        #end
+        selections.add(operation)
+    }
+    #end
+}
+
+fun ktql(queryName: String, init: KTQLImpl.() -> Unit): KTQL {
+    val ktql = KTQLImpl(queryName)
+    ktql.init()
+    require(ktql.selected.map { it.type }.distinct().size == 1) {
+      "Mix of queries and mutations in KTQL. Can only have single type of operation"
+    }
+    return ktql
+}
+
+#foreach ( $operation in $schema.operations)
+class ${operation.name}#if($operation.type.name() == "MUTATION")Mutation#{else}Query#end(
+    resultantObj: ${operation.resultantType.value.name}
+): KTQLOperation<${operation.resultantType.value.name}>() {
+    override val gqlRepresentation = "$operation.name"
+    override val type = OperationType.$operation.type
+    init {
+        selections.addAll(resultantObj.selected)
+    }
+}
+#end
+
+#foreach ($type in $schema.types)
+  #if ($type.fields.size == 0)
+class ${type.name} : TerminalKTQLType<${type.name}>
+  #else
+class ${type.name} : ObjectKTQLType<${type.name}> {
+    private val selections: HashSet<Field<${type.name}, *>> = hashSetOf()
+    override val selected: Set<Field<${type.name}, *>>
+        get() = selections.toSet()
+    #foreach ($field in $type.fields)
+        #if ($field.Primitive)
+    fun ${field.fieldName}() {
+        selections.add(SimpleField("$field.fieldName"))
+    }
+        #else
+    fun ${field.fieldName}(init: ${field.fieldType.value.name}.() -> Unit) {
+        val obj = ${field.fieldType.value.name}()
+        obj.init()
+        selections.add(ComplexField("$field.fieldName", obj))
+    }
+        #end
+    #end
+    override fun all() {
+    #foreach ($field in $type.fields)
+        #if ( $field.Primitive)
+        ${field.fieldName}()
+        #else
+        ${field.fieldName} {
+            all()
+        }
+        #end
+    #end
+    }
+}
+  #end
+#end

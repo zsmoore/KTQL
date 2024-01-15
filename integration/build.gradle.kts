@@ -26,13 +26,25 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>() {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-tasks.register("genKTQL", JavaExec::class) {
+tasks.register("genKTQLInline", JavaExec::class) {
     classpath = sourceSets["main"].runtimeClasspath
     main = "com.zachary_moore.runner.Runner"
     file(buildDir.toPath().resolve("generated/ktql/main/kotlin")).mkdirs()
     args = listOf(
         file("src/test/resources/schema.graphqls").toPath().toAbsolutePath().toString(),
         buildDir.toPath().resolve("generated/ktql/main/kotlin/com/zachary_moore/ktql/").toAbsolutePath().toString(),
+        "INLINE_TRANSLATION"
+    )
+}
+
+tasks.register("genKTQLFileGeneration", JavaExec::class) {
+    classpath = sourceSets["main"].runtimeClasspath
+    main = "com.zachary_moore.runner.Runner"
+    file(buildDir.toPath().resolve("generated/ktql/main/kotlin")).mkdirs()
+    args = listOf(
+        file("src/test/resources/schema.graphqls").toPath().toAbsolutePath().toString(),
+        buildDir.toPath().resolve("generated/ktql/main/kotlin/com/zachary_moore/ktql/file/").toAbsolutePath().toString(),
+        "FILE_GENERATION"
     )
 }
 
@@ -53,5 +65,6 @@ apollo {
 }
 
 tasks.named("build") {
-    dependsOn("genKTQL")
+    dependsOn("genKTQLInline")
+    dependsOn("genKTQLFileGeneration")
 }

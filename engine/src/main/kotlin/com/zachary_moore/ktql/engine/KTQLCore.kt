@@ -2,6 +2,7 @@ package com.zachary_moore.ktql.engine
 
 interface KTQL {
     val selected: Set<KTQLOperation<*>>
+    val name: String?
 }
 
 abstract class KTQLOperation<RESULTANT_TYPE: KTQLType<RESULTANT_TYPE>> {

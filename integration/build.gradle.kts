@@ -61,6 +61,7 @@ apollo {
         packageName.set("com.zachary_moore.integration")
         alwaysGenerateTypesMatching.add(".*")
         schemaFile.set(file("src/test/resources/schema.graphqls"))
+        generateKotlinModels.set(false)
     }
 }
 

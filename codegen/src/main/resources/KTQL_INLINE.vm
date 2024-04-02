@@ -13,7 +13,6 @@ class KTQLImpl : KTQL {
     private val selections = hashSetOf<KTQLOperation<*>>()
     override val selected: Set<KTQLOperation<*>>
             get() = selections.toSet()
-    override val name = null
     #foreach ( $operation in $schema.operations)
 
     fun ${operation.name}#if($operation.type.name() == "MUTATION")Mutation#{else}Query#end(

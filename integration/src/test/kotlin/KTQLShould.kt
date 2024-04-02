@@ -17,7 +17,6 @@ class KTQLShould {
         return ktql {
             TweetsQuery(limit = 10) {
                 id()
-                all()
                 Author {
                     last_name()
                     simpleUser()
@@ -25,9 +24,6 @@ class KTQLShould {
                 Stats {
                     all()
                 }
-            }
-            TweetsMetaQuery {
-                count()
             }
         }
     }

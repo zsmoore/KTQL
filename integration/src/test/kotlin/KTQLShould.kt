@@ -59,7 +59,8 @@ class KTQLShould {
             SomeQueryQuery(obj = Obj(
                 Optional.present("abc"),
                 Optional.present(InnerObj(Optional.present(10)))
-            )) { id() }
+            )
+            ) { id() }
         }
         val str = stringifySorted(res)
         assertEquals("query {SomeQuery(obj : {innerObj : {someInt : 10}, someString : \"abc\"}) {id}}", str)

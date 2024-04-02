@@ -3,5 +3,6 @@ include(
     "integration",
     "processor",
     "scratch",
-    "engine"
+    "engine",
+    "gradle-plugin"
 )

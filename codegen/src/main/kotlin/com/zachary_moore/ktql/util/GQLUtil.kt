@@ -1,4 +1,4 @@
-package com.zachary_moore.util
+package com.zachary_moore.ktql.util
 
 import graphql.language.ListType
 import graphql.language.NonNullType

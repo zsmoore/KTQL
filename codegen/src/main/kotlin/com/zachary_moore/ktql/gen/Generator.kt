@@ -1,6 +1,6 @@
-package com.zachary_moore.gen
+package com.zachary_moore.ktql.gen
 
-import com.zachary_moore.spec.Schema
+import com.zachary_moore.ktql.spec.Schema
 import org.apache.velocity.VelocityContext
 import org.apache.velocity.app.Velocity
 import java.io.File
@@ -13,7 +13,8 @@ class Generator(
 
     fun generate(outputDir: File,
                  apolloPackagePrefix: String,
-                 ktqlMode: KTQLMode) {
+                 ktqlMode: KTQLMode
+    ) {
         val p = Properties()
         p.setProperty("file.resource.loader.path", "/Users/zsmoore/dev/KTQL/codegen/src/main/resources/")
         Velocity.init(p)
@@ -24,7 +25,8 @@ class Generator(
 
     private fun generateKTQL(ktqlOutputPath: File,
                              apolloPackagePrefix: String,
-                             ktqlMode: KTQLMode) {
+                             ktqlMode: KTQLMode
+    ) {
         val context = VelocityContext()
         context.put("schema", schema)
         context.put("apolloPrefix", apolloPackagePrefix)
@@ -40,7 +42,8 @@ class Generator(
     }
 
     private fun generateKTQLEngine(ktqlEngineOutputPath: File,
-                                   ktqlMode: KTQLMode) {
+                                   ktqlMode: KTQLMode
+    ) {
         val template = when(ktqlMode) {
             KTQLMode.INLINE_TRANSLATION -> Velocity.getTemplate("KTQL_INLINE_ENGINE.vm")
             else -> throw IllegalStateException("Only inline translation supported")

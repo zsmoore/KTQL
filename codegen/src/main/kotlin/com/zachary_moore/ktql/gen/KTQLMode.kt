@@ -1,4 +1,4 @@
-package com.zachary_moore.gen
+package com.zachary_moore.ktql.gen
 
 /**
  * Generator Modes for KTQL

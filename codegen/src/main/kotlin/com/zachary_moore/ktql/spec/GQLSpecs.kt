@@ -1,4 +1,4 @@
-package com.zachary_moore.spec
+package com.zachary_moore.ktql.spec
 
 data class Schema(
     val operations: List<Operation>,

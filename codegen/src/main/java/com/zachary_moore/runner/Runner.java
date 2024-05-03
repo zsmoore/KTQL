@@ -1,9 +1,9 @@
 package com.zachary_moore.runner;
 
-import com.zachary_moore.SchemaProcessor;
-import com.zachary_moore.gen.Generator;
-import com.zachary_moore.gen.KTQLMode;
-import com.zachary_moore.spec.Schema;
+import com.zachary_moore.ktql.SchemaProcessor;
+import com.zachary_moore.ktql.gen.Generator;
+import com.zachary_moore.ktql.gen.KTQLMode;
+import com.zachary_moore.ktql.spec.Schema;
 import graphql.schema.idl.SchemaParser;
 import graphql.schema.idl.TypeDefinitionRegistry;
 

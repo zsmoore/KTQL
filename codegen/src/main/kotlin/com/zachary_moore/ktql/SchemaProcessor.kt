@@ -1,7 +1,7 @@
-package com.zachary_moore
+package com.zachary_moore.ktql
 
-import com.zachary_moore.spec.*
-import com.zachary_moore.util.*
+import com.zachary_moore.ktql.spec.*
+import com.zachary_moore.ktql.util.*
 import graphql.language.FieldDefinition
 import graphql.language.InputValueDefinition
 import graphql.language.ObjectTypeDefinition
@@ -142,7 +142,7 @@ class SchemaProcessor(
         return inputValueDefinitions.map { def -> processSingleInputValueDefinition(def) }
     }
 
-    private fun processSingleInputValueDefinition(inputValueDefinition: InputValueDefinition): InputType{
+    private fun processSingleInputValueDefinition(inputValueDefinition: InputValueDefinition): InputType {
         val isList = isWrappedListOrList(inputValueDefinition.type)
         val baseType = getBaseTypeName(inputValueDefinition.type)
         return InputType(

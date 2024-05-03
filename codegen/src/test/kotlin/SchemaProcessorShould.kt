@@ -1,8 +1,8 @@
 
-import com.zachary_moore.SchemaProcessor
-import com.zachary_moore.spec.ComplexField
-import com.zachary_moore.spec.Field
-import com.zachary_moore.spec.SimpleField
+import com.zachary_moore.ktql.SchemaProcessor
+import com.zachary_moore.ktql.spec.ComplexField
+import com.zachary_moore.ktql.spec.Field
+import com.zachary_moore.ktql.spec.SimpleField
 import graphql.schema.idl.SchemaParser
 import graphql.schema.idl.TypeDefinitionRegistry
 import org.junit.jupiter.api.BeforeAll

@@ -1,4 +1,4 @@
-package inline
+
 import com.apollographql.apollo3.api.Optional
 import com.zachary_moore.integration.type.InnerObj
 import com.zachary_moore.integration.type.Obj
@@ -17,7 +17,6 @@ class KTQLShould {
         return ktql {
             TweetsQuery(limit = 10) {
                 id()
-                all()
                 Author {
                     last_name()
                     simpleUser()
@@ -25,9 +24,6 @@ class KTQLShould {
                 Stats {
                     all()
                 }
-            }
-            TweetsMetaQuery {
-                count()
             }
         }
     }
@@ -59,7 +55,8 @@ class KTQLShould {
             SomeQueryQuery(obj = Obj(
                 Optional.present("abc"),
                 Optional.present(InnerObj(Optional.present(10)))
-            )) { id() }
+            )
+            ) { id() }
         }
         val str = stringifySorted(res)
         assertEquals("query {SomeQuery(obj : {innerObj : {someInt : 10}, someString : \"abc\"}) {id}}", str)

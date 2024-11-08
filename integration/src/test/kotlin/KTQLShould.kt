@@ -15,13 +15,13 @@ class KTQLShould {
 
     private fun simpleQuery(): KTQL {
         return ktql {
-            TweetsQuery(limit = 10) {
+            tweetsQuery(limit = 10) {
                 id()
-                Author {
-                    last_name()
+                author {
+                    lastName()
                     simpleUser()
                 }
-                Stats {
+                stats {
                     all()
                 }
             }
